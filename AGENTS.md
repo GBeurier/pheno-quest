@@ -1,5 +1,7 @@
 # Repository Guidelines
 
+**Pheno-Quest** (`GBeurier/Pheno-Quest`, <https://gbeurier.github.io/Pheno-Quest/>) is the game of the PhenoMEn team's PhD students (UMR AGAP Institut, CIRAD/INRAE). It is a fork of Laura Quest (`GBeurier/laura-quest`, git remote `laura-quest`), which stays online unchanged for former players: never push Pheno-Quest changes there.
+
 ## Project Structure & Module Organization
 
 This is a static browser game built on the vendored KAPLAY engine. `index.html` is the entry point and works under `file://`. Core game code lives in `js/`: `game.js` handles scenes and gameplay, `config.js` contains tuning and story text, `level.js` stores ASCII maps, `bosses.js` defines boss AI, `save.js` manages `localStorage` (slots + global prefs like audio mute), `music.js` is a dependency-free chiptune MIDI player (`window.LQ_MUSIC`), and `mobile.js` handles touch support. `engine/kaplay.js` is third-party engine code. Runtime media belongs in `assets/sprites/`, `assets/sounds/` and `assets/music/` (`.mid`, one track per level plus per-screen tracks mapped in `CONFIG.music`); sprite specs are in `SPRITES.md`. `js/assets_data.js` is generated from those assets. Tooling and asset pipelines live in `tools/` and `_...gen/` work directories. Audio shortcuts: `S` toggles sound effects, `M` toggles music (persisted via `LQ_SAVE` prefs).

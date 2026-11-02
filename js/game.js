@@ -4670,12 +4670,14 @@
 
     // --- titre : grand, dore, contour epais + bob ----------------------
     const titleY = 74;
-    const title = inkText('LAURA QUEST', C.width / 2, titleY, 50, GOLD, { outline: 4, shadow: true, z: 8 });
+    const title = inkText('PHENO QUEST', C.width / 2, titleY, 50, GOLD, { outline: 4, shadow: true, z: 8 });
     // --- sous-titre : creme sur ruban terracotta -----------------------
     pill(C.width / 2, 128, 470, 38, RED, 0.9, 19, 5);
-    inkText('Les aventures des explorateurs', C.width / 2, 128, 22, CREAM, { outline: 2, ink: [120, 30, 24], z: 6 });
+    inkText('Les doctorants de PhenoMEn', C.width / 2, 128, 22, CREAM, { outline: 2, ink: [120, 30, 24], z: 6 });
     // --- accroche : une ligne qui claque -------------------------------
-    inkText('Choisis ton personnage, explore son monde et defie ses boss !', C.width / 2, 178, 17, CREAM, { outline: 2, z: 6 });
+    inkText('Choisis ton doctorant, survis a sa these et decroche la soutenance !', C.width / 2, 178, 17, CREAM, { outline: 2, z: 6 });
+    // --- credit equipe (sans accents : font bitmap) -----------------
+    inkText('Equipe PhenoMEn  -  UMR AGAP Institut  -  CIRAD / INRAE', C.width / 2, 206, 13, [220, 214, 198], { outline: 2, z: 6 });
 
     // --- bandeau bas : controles -------------------------------------
     pill(C.width / 2, C.height - 22, C.width, 56, [26, 18, 12], 0.5, 0, 3);

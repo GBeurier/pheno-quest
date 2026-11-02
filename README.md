@@ -1,12 +1,28 @@
-# Laura Quest — Les explorateurs 🌾☀️🐈
+# Pheno-Quest — Les doctorants de PhenoMEn 🌱☀️🎓
 
-Jeu web façon Mario/run-and-gun, **100 % côté client, sans serveur**, fait pour
-l'anniversaire de Laura (docteure en agroclimato). On incarne **Laura**, qui prépare son
-**PhD sur l'agrivoltaïsme** (panneaux solaires au-dessus des rizières). Elle ramasse des
-**données** et des **pages de thèse**, lance des **graines / pieds de riz** et son **chat
-angora**, et gagne **un chapitre** en battant le boss de chaque niveau. Après **5 niveaux**
-elle affronte le **jury de thèse** et décroche son **PhD**. Style _Dora l'exploratrice_ /
-_Animal Crossing_.
+**▶ Jouer : <https://gbeurier.github.io/Pheno-Quest/>**
+
+Pheno-Quest est le jeu des **doctorants de l'équipe PhenoMEn** (*Phénotypage et modélisation
+des plantes dans leur environnement agro-climatique*, [UMR AGAP Institut](https://umr-agap.cirad.fr/recherches/equipes-de-recherche/phenotypage-et-modelisation-des-plantes-dans-leur-environnement-agro-climatique/contexte-et-enjeux),
+CIRAD / INRAE, Montpellier) qui arrivent à **soutenance**. Chaque doctorant a son personnage
+et sa campagne : on traverse sa thèse niveau par niveau, on bat un boss par chapitre, puis on
+affronte le jury.
+
+Jeu web façon Mario/run-and-gun, **100 % côté client, sans serveur**.
+
+> Pheno-Quest est né de **[Laura Quest](https://github.com/GBeurier/laura-quest)**, le jeu fait
+> pour la soutenance de Laura. Laura Quest reste en ligne tel quel pour les anciens qui y
+> rejouent : <https://gbeurier.github.io/laura-quest/>.
+
+### Campagnes
+
+- **Laura** (agroclimato) prépare son **PhD sur l'agrivoltaïsme** (panneaux solaires au-dessus
+  des rizières). Elle ramasse des **données** et des **pages de thèse**, lance des **graines /
+  pieds de riz** et son **chat angora**, et gagne **un chapitre** en battant le boss de chaque
+  niveau. Après **5 niveaux** elle affronte le **jury de thèse** et décroche son **PhD**.
+- **Marcos** : 3 niveaux à Java, kit guitare et armée d'étudiants, puis sa soutenance.
+
+### En bref
 
 - **5 boss différents** (1 gameplay par boss) : RStudio, le propriétaire terrien, Cendrine
   (l'administration), l'agriculteur fou, Michael Dingkhun — puis le **jury** (mégaboss multi-phases).
