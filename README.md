@@ -1,6 +1,6 @@
 # Pheno-Quest — Les doctorants de PhenoMEn 🌱☀️🎓
 
-**▶ Jouer : <https://gbeurier.github.io/Pheno-Quest/>**
+**▶ Jouer : <https://gbeurier.github.io/pheno-quest/>**
 
 Pheno-Quest est le jeu des **doctorants de l'équipe PhenoMEn** (*Phénotypage et modélisation
 des plantes dans leur environnement agro-climatique*, [UMR AGAP Institut](https://umr-agap.cirad.fr/recherches/equipes-de-recherche/phenotypage-et-modelisation-des-plantes-dans-leur-environnement-agro-climatique/contexte-et-enjeux),

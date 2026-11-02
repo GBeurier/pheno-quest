@@ -1,6 +1,6 @@
 # Repository Guidelines
 
-**Pheno-Quest** (`GBeurier/Pheno-Quest`, <https://gbeurier.github.io/Pheno-Quest/>) is the game of the PhenoMEn team's PhD students (UMR AGAP Institut, CIRAD/INRAE). It is a fork of Laura Quest (`GBeurier/laura-quest`, git remote `laura-quest`), which stays online unchanged for former players: never push Pheno-Quest changes there.
+**Pheno-Quest** (`GBeurier/pheno-quest`, <https://gbeurier.github.io/pheno-quest/>) is the game of the PhenoMEn team's PhD students (UMR AGAP Institut, CIRAD/INRAE). It is a fork of Laura Quest (`GBeurier/laura-quest`, git remote `laura-quest`), which stays online unchanged for former players: never push Pheno-Quest changes there.
 
 ## Project Structure & Module Organization
 
