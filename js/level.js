@@ -150,21 +150,21 @@ window.LEVELS = {
   //  du dessous est vide), 'y' oiseau qui pique, 'Z' scooter, 'g' pickup durian.
   //  1. Le chantier des rizieres : boue, rats, structures en construction -> RAJA TIKUS.
   marcos_rizieres: {
-    boss: 'tikus', music: 'niveau3', npcLevel: 'marcos',
+    boss: 'tikus', music: 'marcos_niveau1', npcLevel: 'marcos',
     par: { or: 100, argent: 150, bronze: 220 },
     theme: JAVA_THEME('bg_java_paddy'),
     map: LEVEL_MAPS.marcos_rizieres,
   },
   //  2. Le village et la route : scooters, marche aux durians -> PAK DURIAN.
   marcos_village: {
-    boss: 'pakdurian', music: 'niveau4', npcLevel: 'marcos',
+    boss: 'pakdurian', music: 'marcos_niveau2', npcLevel: 'marcos',
     par: { or: 115, argent: 170, bronze: 250 },
     theme: JAVA_THEME('bg_java_village', { sky: [150, 206, 236], tint: [252, 244, 228] }),
     map: LEVEL_MAPS.marcos_village,
   },
   //  3. La parcelle agrivoltaique : rangees de structures, oiseaux -> GARUDA (final).
   marcos_parcelle: {
-    boss: 'garuda', music: 'jury', npcLevel: 'marcos',
+    boss: 'garuda', music: 'marcos_niveau3', npcLevel: 'marcos',
     par: { or: 130, argent: 190, bronze: 270 },
     theme: JAVA_THEME('bg_java_paddy', { sky: [128, 192, 232], tint: [236, 244, 230] }),
     map: LEVEL_MAPS.marcos_parcelle,
