@@ -119,9 +119,12 @@ window.LQ_SAVE = (() => {
   function erase(i, id = 'laura') {
     if (!validSlot(i)) return;
     CONTENT.campaignFor(id);
-    // Sinon la sauvegarde legacy ressusciterait au prochain load.
-    if (id === 'laura') remove(LEGACY_KEY(i));
-    remove(KEY(i, id));
+    // Laura : on NE SUPPRIME PAS la save legacy (lauraquest_slot_<i>) -- c'est
+    //  celle de Laura Quest legacy, qui partage l'origine gbeurier.github.io (donc
+    //  le meme localStorage). Une "pierre tombale" 'null' sur la cle v3 empeche
+    //  load() de la re-migrer (elle ne ressuscite pas ici).
+    if (id === 'laura') write(KEY(i, id), 'null');
+    else remove(KEY(i, id));
   }
   function list(id = 'laura') { return Array.from({ length: SLOTS }, (_, i) => load(i, id)); }
   function completion(d) {

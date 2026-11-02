@@ -86,7 +86,8 @@ pas les résultats. Un niveau ajouté après un niveau fini devient accessible ;
 résultats d'un niveau temporairement retiré restent conservés. Ne pas renommer les
 identifiants de personnage, aventure ou niveau déjà publiés sans migration explicite.
 Les anciens slots `lauraquest_slot_*` sont migrés à leur première lecture vers
-`lauraquest_v3_laura_*` ; leur source est conservée jusqu'à un effacement volontaire.
+`lauraquest_v3_laura_*` ; leur source n'est jamais effacée (elle appartient à Laura Quest legacy, même origine
+`gbeurier.github.io` donc même `localStorage`) : effacer le slot pose une « pierre tombale » sur la clé v3.
 Les préférences audio restent communes. Si le stockage échoue, la partie continue
 avec une sauvegarde en mémoire pour la session.
 

@@ -77,6 +77,8 @@ assert.equal(api.load(0, 'marcos'), null);
 assert.equal(api.load(0, 'laura').bestScore, 100);
 api.erase(0, 'laura');
 assert.equal(boot(storage).LQ_SAVE.load(0, 'laura'), null);
+// La save legacy appartient a Laura Quest legacy (meme origine) : jamais effacee.
+assert.equal(storage.get('lauraquest_slot_0'), JSON.stringify(legacy));
 // Stockage corrompu et navigateur bloque.
 for (const corrupt of ['null', 'true', '[]', '{', '{"version":3}']) {
   const bad = new Map([['lauraquest_v3_marcos_0', corrupt]]);
