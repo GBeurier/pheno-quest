@@ -4673,7 +4673,7 @@
     const title = inkText('PHENO QUEST', C.width / 2, titleY, 50, GOLD, { outline: 4, shadow: true, z: 8 });
     // --- sous-titre : creme sur ruban terracotta -----------------------
     pill(C.width / 2, 128, 470, 38, RED, 0.9, 19, 5);
-    inkText('Les doctorants de PhenoMEn', C.width / 2, 128, 22, CREAM, { outline: 2, ink: [120, 30, 24], z: 6 });
+    inkText('La quete du diplome magique', C.width / 2, 128, 22, CREAM, { outline: 2, ink: [120, 30, 24], z: 6 });
     // --- accroche : une ligne qui claque -------------------------------
     inkText('Choisis ton doctorant, survis a sa these et decroche la soutenance !', C.width / 2, 178, 17, CREAM, { outline: 2, z: 6 });
     // --- credit equipe (sans accents : font bitmap) -----------------

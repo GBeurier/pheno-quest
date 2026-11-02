@@ -1,4 +1,4 @@
-# Pheno-Quest — Les doctorants de PhenoMEn 🌱☀️🎓
+# Pheno-Quest — La quête du diplôme magique 🌱☀️🎓
 
 **▶ Jouer : <https://gbeurier.github.io/pheno-quest/>**
 
