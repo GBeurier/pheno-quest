@@ -769,6 +769,12 @@
   //  size / damage / range; X charge = rolling speed. Costs sun.
   //  Laura and Marcos never get here (isChili() false). cf. CONFIG.kits.chili.jar
   // =====================================================================
+  // Level width in columns. NOT grid[0].length: map rows are not padded (trailing
+  //  spaces trimmed, blank first rows), so the first row can be much shorter than
+  //  the level -> everything past it (boss arena included) was taken for the map
+  //  edge and the jar exploded on the spot.
+  const levelCols = () => Math.max(Math.round(((LEVEL && LEVEL.width) || 0) / TS),
+    ...((LEVEL && LEVEL.grid) || []).map((row) => (row ? row.length : 0)), 0);
   const ROLL_SURF = { '=': 1, '-': 1, 'x': 1, '^': 1, '%': 1, '~': 1 };
   const WALL_CH = { '=': 1, '^': 1 };
   // top of the first rolling surface at/below fromY in column x (null = none)
@@ -776,7 +782,7 @@
     const grid = LEVEL && LEVEL.grid;
     if (!grid) return null;
     const c = Math.floor(x / TS);
-    if (c < 0 || c >= (grid[0] || '').length) return null;
+    if (c < 0 || c >= levelCols()) return null;
     for (let r = Math.max(0, Math.floor(fromY / TS)); r < grid.length; r++) {
       if (ROLL_SURF[grid[r] && grid[r][c]]) return r * TS;
     }
@@ -787,7 +793,7 @@
     const grid = LEVEL && LEVEL.grid;
     if (!grid) return false;
     const c = Math.floor(x / TS), r = Math.floor(y / TS);
-    if (c < 0 || c >= (grid[0] || '').length) return true;
+    if (c < 0 || c >= levelCols()) return true;
     if (r < 0 || r >= grid.length) return false;
     return !!WALL_CH[grid[r][c]];
   }
@@ -819,7 +825,10 @@
     if (C.sun.enabled) p.sun = Math.max(0, p.sun - (L.cost || 0));
     const dir = p.facing >= 0 ? 1 : -1;
     const cmin = J.chargeMin != null ? J.chargeMin : 0.6;
-    const speed = (J.speed || 380) * (cmin + (1 - cmin) * Math.max(0, Math.min(1, pw == null ? 1 : pw)));
+    // + Oriane's own forward momentum: on the bike (250 x 1.7 = 425 px/s) she used to
+    //  overtake her own jar, which then seemed to stay behind instead of rolling ahead
+    const carry = Math.max(0, (p.runVx || 0) * dir);
+    const speed = (J.speed || 380) * (cmin + (1 - cmin) * Math.max(0, Math.min(1, pw == null ? 1 : pw))) + carry;
     const spr = hasSprite(J.sprite) ? J.sprite : (J.fallback || 'ammo_gateau');
     const R = (J.radius || 17) * (L.scale || 1);             // rolling radius (px)
     const jar = add([
@@ -4606,6 +4615,7 @@
         if (keysDown(C.controls.left)) { p.move(-spd, 0); p.facing = -1; moving = true; }
         if (keysDown(C.controls.right)) { p.move(spd, 0); p.facing = 1; moving = true; }
       }
+      p.runVx = moving ? p.facing * spd : 0;   // current walking / riding speed (the rolling jar inherits it)
 
       // TIR DE BASE (graine, gratuit) : rafale en maintenant ESPACE. Le lob lourd
       //  (X) part via onPlayKey(C.controls.lob, lobShoot), pas ici.
