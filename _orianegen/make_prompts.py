@@ -143,20 +143,24 @@ ASSETS = {
  # Oriane (v2 outfit, fine pixel art) on her bike WITH the CHILI CANNON on the handlebars (her chili peppers
  #  come out of it on the bike). Refs: the v2 hero sheet (identity / style), Laura's bike sheet (style + scale),
  #  the v1 cannon bike (layout + cannon design only).
- 'oriane_bike_cannon': (['oriane_sheet.png', 'hero_bike.png', 'oriane_bike_cannon_v2.png'],
+ 'oriane_bike_cannon': (['oriane_sheet.png', 'hero_bike.png'],
    HEAD + HERO_PIX.replace('the two existing heroes of the game (Laura and Marcos, attached)',
                            'LAURA, the existing heroine of the game (attached)') + LAURA_PROPS +
    'ATTACHED IMAGES: image 1 is the sprite sheet of ORIANE, the heroine: reproduce her EXACTLY (same face, hair, '
    'cartoon proportions, chili-red paisley blouse, turquoise trousers, yellow sneakers, satchel, same pixel style and '
-   'density). Image 2 shows LAURA riding her bike in this game: STYLE, pixel density, rider PROPORTIONS and SCALE '
-   'reference (Oriane sits on the bike with the same cartoon body, big head and short limbs as Laura). Image 3 is an '
-   'OLD draft of Oriane on her bike: use it ONLY for the layout (4 frames in one row), the black city bike and the '
-   'design of the chili cannon; do NOT copy its realistic tall-adult proportions.\n\n'
-   'SUBJECT: Oriane RIDING a black city BICYCLE (black frame, a small rear rack with a red rear light, thin black '
-   'wheels with fine spokes), in STRICT RIGHT-FACING SIDE PROFILE, leaning forward happily, pedalling. She wears a '
-   'round glossy BLACK helmet painted exactly like a BILLIARD 8-BALL: shiny black dome with a white circle on its side '
-   'containing a black number "8" (the only text allowed), her long wavy light-brown hair flowing out behind under '
-   'it.\n\n'
+   'density). Image 2 shows LAURA riding her bike in this game: THE reference for the BIKE SIZE, the rider SCALE and '
+   'the composition. Copy it closely.\n\n'
+   'SCALE (CRITICAL, the main point of this sheet): Oriane on the bike must keep EXACTLY the SAME size and cartoon '
+   'proportions as when she stands in image 1: the SAME big head size, the same short limbs. The bike is a SMALL, '
+   'COMPACT cartoon bike sized for her, exactly like Laura\'s in image 2: SMALL wheels (each wheel about as tall as '
+   'her leg from knee to sole, roughly one quarter of the total height), a short low frame. The whole group (helmet '
+   'top to wheel bottom) is only about as tall as Oriane standing. NOT a big adult city bike with large wheels, NOT a '
+   'small rider on a big bike.\n\n'
+   'SUBJECT: Oriane RIDING her compact BLACK bike (glossy black frame, a tiny rear rack with a red rear light, small '
+   'black wheels with fine spokes), in STRICT RIGHT-FACING SIDE PROFILE, leaning forward happily, pedalling. She wears '
+   'a round glossy BLACK helmet painted exactly like a BILLIARD 8-BALL: shiny black dome with a white circle on its '
+   'side containing a black number "8" (the only text allowed), her long wavy light-brown hair flowing out behind '
+   'under it.\n\n'
    'LAYOUT (critical): EXACTLY 4 frames in a SINGLE horizontal row, a uniform grid of 4 equal square cells, the bike '
    'and rider at the SAME scale with both wheels on the SAME baseline near the bottom of every cell, centered, a WIDE '
    'empty gap between frames (frames never touch). Only the pedals, legs and a slight bob change across the 4 frames '
@@ -166,7 +170,7 @@ ASSETS = {
    'big glossy RED CHILI PEPPER lying horizontally, with its green stem cap and a little brass ring at the BACK (near '
    'her hands) and a dark round open MUZZLE pointing straight FORWARD to the RIGHT, perfectly horizontal, at the '
    'height of the handlebars. A couple of tiny red chili peppers peek out of a small ammo box clipped under it. Keep '
-   'the cannon COMPACT: its muzzle sticks out only slightly beyond the front edge of the front wheel. It must look '
+   'the cannon COMPACT: its muzzle sticks out only slightly beyond the front edge of the front wheel (scaled to the small bike). It must look '
    'like part of the bike (same outline, same palette, same light), clearly readable at small size.\n\n' + MAGENTA),
  # ------------------------------------------------------------------ level 2: simulation world
  'tile_simu': (['tile_panel.png'], HEAD + PIX + DIGITAL + MAGENTA.replace('every gap', 'around the object') +

@@ -38,6 +38,9 @@ CELL, FIG_H, BASE = 224, 176, 220   # v3: cartoon proportions -> Laura's height 
 # v2 sheets are fine, richly shaded pixel art: Lanczos downscale (premultiplied, binary alpha)
 #  keeps eyes / hair cleaner than nearest. False = nearest (v1 chunky sheets).
 SMOOTH = True
+# bike sheet height / standing height: the 8-ball helmet adds height, so the group is a bit taller than
+#  Oriane standing; 1.12 keeps her head the SAME size on the bike as on foot (cf. Laura's hero_bike).
+BIKE_H = 1.12
 STATES = {'idle': [0, 1], 'run': [4, 5, 6, 7], 'jump': [8, 9], 'hurt': [10], 'throw': [2, 3],
           'duck': [0, 12, 13], 'dash': [11], 'dead': [14, 15]}
 
@@ -110,7 +113,7 @@ def build_bike():
     cells = grid_cells(im, 4, 1)
     # the rider on her bike is drawn at a different scale than the standing sheet:
     #  normalise the tallest frame to ~0.98 x the standing figure height
-    k = (FIG_H * 0.98) / max(c.height for c in cells)
+    k = (FIG_H * BIKE_H) / max(c.height for c in cells)
     W = 256
     sheet = Image.new('RGBA', (W * 4, CELL))
     muzzles = []
