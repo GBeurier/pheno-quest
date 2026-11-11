@@ -23,7 +23,7 @@ Jeu web façon Mario/run-and-gun, **100 % côté client, sans serveur**.
 - **Marcos** : 3 niveaux à Java, kit guitare et armée d'étudiants, puis sa soutenance.
 - **Oriane** : modélisation des cultures (STICS). 3 niveaux — l'appart de Laura et son proprio,
   l'intérieur de la simulation (boss : STICS, le modèle de culture qui plante sans arrêt), le labo du CIRAD (boss final :
-  **Woriane**, sa part d'ombre) — kit piments + pot de beurre de cacahuète qui roule, vélo avec
+  **Dark Woriane**, sa part d'ombre) — kit piments + pot de beurre de cacahuète qui roule, vélo avec
   casque boule de billard n°8 et **canon à piments** sur le guidon.
 
 ### En bref

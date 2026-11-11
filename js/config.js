@@ -584,7 +584,7 @@ window.CONFIG = {
     woriane:      { sprite: 'boss_woriane_move', attackSprite: 'boss_woriane_atk', fallback: 'boss_cendrine_move', fallbackAtk: 'boss_cendrine_atk', behavior: 'woriane',
                     //  FINAL boss, the hardest of Oriane's: 15% bigger, aimed potshots while
                     //  pacing, comboN attacks chained before each (short) collapse window.
-                    hp: 160, maxHp: 160, guard: 0.3, scale: 1.15, touchDamage: 2, shotSpeed: 300, speed: 150, range: 480, score: 3500, name: 'WORIANE, LA PART D OMBRE', shot: 'shot_darkchili',
+                    hp: 160, maxHp: 160, guard: 0.3, scale: 1.15, touchDamage: 2, shotSpeed: 300, speed: 150, range: 480, score: 3500, name: 'DARK WORIANE', shot: 'shot_darkchili',
                     jar: 'shot_darkjar', bolt: 'shot_doubt', cloud: 'doute', keepGap: 3, paceTime: 0.8, potshotEvery: 0.9, comboN: 2,
                     chiliN: 5, jarSpeed: 360, cloudN: 3, dashSpeed: 600, panicWaves: 4, panicN: 10, collapseTime: 1.4,
                     p2PaceTime: 0.5, p2PotshotEvery: 0.6, p2ComboN: 3, p2ChiliN: 7, p2CloudN: 4, p2CollapseTime: 1.0 },

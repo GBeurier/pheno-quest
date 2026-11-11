@@ -4692,6 +4692,10 @@
         // on the bike / rollers WITHOUT a dedicated arm layer (Oriane, Marcos):
         //  stay on the vehicle sheet while shooting (the projectile still fires)
         else if (p.equipped) actBody = null;
+        // RUNNING without a run-arm layer (Oriane): keep the run cycle while shooting.
+        //  The full-body standing throw made her slide across the floor like a statue
+        //  as long as SPACE was held. (Oriane only: Marcos keeps his guitar strum.)
+        else if (isChili() && loco === 'run' && actClip === 'throw') actBody = null;
         else actBody = hasSprite('hero_throw') ? 'hero_throw' : actAmmoSpr;   // idle/saut -> plein-corps
       }
       setActionOverlay(p, actOvSpr, actClip, actReplay);            // (de)pose le calque d'action
