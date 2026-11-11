@@ -15,8 +15,10 @@ permissions:
   id-token: write
 
 # Un seul déploiement à la fois ; on annule les runs en cours dépassés.
+# (groupe renomme le 2026-11-11 : un run fantome restait bloque 'en file'
+#  dans l'ancien groupe 'pages' et retenait tous les deploiements suivants)
 concurrency:
-  group: pages
+  group: pages-deploy
   cancel-in-progress: true
 
 jobs:
