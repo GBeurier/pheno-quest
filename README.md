@@ -21,6 +21,10 @@ Jeu web façon Mario/run-and-gun, **100 % côté client, sans serveur**.
   pieds de riz** et son **chat angora**, et gagne **un chapitre** en battant le boss de chaque
   niveau. Après **5 niveaux** elle affronte le **jury de thèse** et décroche son **PhD**.
 - **Marcos** : 3 niveaux à Java, kit guitare et armée d'étudiants, puis sa soutenance.
+- **Oriane** : modélisation des cultures (STICS). 3 niveaux — l'appart de Laura et son proprio,
+  l'intérieur de la simulation (boss : STICS, le modèle de culture qui plante sans arrêt), le labo du CIRAD (boss final :
+  **Woriane**, sa part d'ombre) — kit piments + pot de beurre de cacahuète qui roule, vélo avec
+  casque boule de billard n°8 et **canon à piments** sur le guidon.
 
 ### En bref
 
@@ -136,6 +140,12 @@ re-attrape le focus automatiquement, mais un clic dans la fenêtre lève tout do
 | S'accroupir / descendre d'une plateforme | Bas / Bas + saut |
 | Pause / retour | Échap |
 | Son / musique | S / M (préférences globales) |
+
+Touches par défaut ci-dessus. **Toutes se reconfigurent** depuis l'écran-titre (touche **T**,
+ou `index.html#controls`) : deux touches par action, échange automatique en cas de conflit,
+Échap réservé ; le réglage est global (tous les personnages) et le HUD affiche les touches choisies.
+Le « tir spécial » (X par défaut) est le lob de Laura, le power chord de Marcos et le pot de beurre
+de cacahuète d'Oriane ; l'« allié » (C) est le chat de Laura ou les étudiants de Marcos (Oriane n'en a pas).
 
 Sur l'écran-titre : **Espace** → **personnage** → **sauvegarde du personnage** (A/B/C) → présentation de la nouvelle aventure → **carte du monde**
 (flèches pour choisir un chapitre débloqué, Espace pour entrer). On gagne un chapitre en

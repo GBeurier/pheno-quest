@@ -66,18 +66,21 @@
     const banned = (avoid || []).reduce((s, a) => s.concat(ctrl[a] || []), []);
     return arr.find((k) => banned.indexOf(k) < 0) || arr[0] || action;
   };
+  // GETTERS: the keys are resolved at each press, so a rebind made in the
+  //  'controls' screen (js/controls.js mutates C.controls in place) applies
+  //  to the touch pad without a reload.
   const KEY = {
-    left: pick('left'),
-    right: pick('right'),
+    get left() { return pick('left'); },
+    get right() { return pick('right'); },
     // surtout PAS 'up' (la doc/le HUD annoncent 'z' ; pick() seul rendait le 1er
     //  element = 'up', en contradiction avec ce commentaire et CLAUDE.md).
-    jump: (ctrl.jump || []).find((k) => k !== 'up') || pick('jump'),
-    shoot: pick('shoot'),
-    crouch: pick('crouch'),
-    cat: pick('cat'),
-    lob: pick('lob'),                           // lob lourd (auto-vise) -> 'x'
-    dash: pick('dash'),                         // dash (ruee + i-frames) -> 'shift'
-    quit: pick('quit'),
+    get jump() { return (ctrl.jump || []).find((k) => k !== 'up') || pick('jump'); },
+    get shoot() { return pick('shoot'); },
+    get crouch() { return pick('crouch'); },
+    get cat() { return pick('cat'); },
+    get lob() { return pick('lob'); },          // lob lourd (auto-vise) -> 'x'
+    get dash() { return pick('dash'); },        // dash (ruee + i-frames) -> 'shift'
+    get quit() { return pick('quit'); },
   };
 
   // --- Boutons (DOM) --------------------------------------------------
@@ -96,11 +99,12 @@
   //  declenche onKeyPress sur le keydown (1 saut par tap) ; le maintien ne
   //  re-tire pas (garde `on`). Pour DROITE/TIR/CHAT, keysDown reste vrai tant
   //  qu'on appuie. Multi-touch : chaque bouton capture son propre pointeur.
-  function bindHold(el, token) {
-    const k = domKey(token);
+  function bindHold(el, action) {
+    let k = null;                       // key resolved at press, reused by the release
     let on = false, pid = null;
     const press = (e) => {
       if (on) return;
+      k = domKey(KEY[action]);
       on = true; pid = e.pointerId; el.classList.add('on');
       try { el.setPointerCapture(e.pointerId); } catch (_) {}
       if (e.cancelable) e.preventDefault();
@@ -128,13 +132,13 @@
   //  temps pour que crouch soit deja "down" cote KAPLAY. Tap simple = rien de
   //  plus (accroupi normal). 'jk' = touche jump telle que synthetisee par SAUT.
   function bindDoubleTapJump(el) {
-    const jk = domKey(KEY.jump);
     const WINDOW = 300, DELAY = 40, HOLD = 100;       // ms
     let last = 0;
     el.addEventListener('pointerdown', () => {
       const now = (typeof performance !== 'undefined' ? performance.now() : Date.now());
       if (now - last <= WINDOW) {
         last = 0;                                      // consomme : pas de triple-tap en chaine
+        const jk = domKey(KEY.jump);
         setTimeout(() => fire('keydown', jk), DELAY);
         setTimeout(() => fire('keyup', jk), DELAY + HOLD);
       } else {
@@ -154,7 +158,7 @@
     const bL = makeBtn('lq-move lq-dirL', '◀');   // ◀
     const bR = makeBtn('lq-move lq-dirR', '▶');   // ▶
     const bDown = makeBtn('lq-small lq-crouch', '▼'); // ▼ accroupi
-    bindHold(bL, KEY.left); bindHold(bR, KEY.right); bindHold(bDown, KEY.crouch);
+    bindHold(bL, 'left'); bindHold(bR, 'right'); bindHold(bDown, 'crouch');
 
     // ▼ DOUBLE-TAP = drop-through (descendre a travers un panneau). Au clavier
     //  c'est BAS+SAUT ; en tactile on evite le combo 2 doigts -> 2e tap rapide
@@ -172,12 +176,12 @@
     const bCat = makeBtn('lq-small lq-cat', '🐱');     // 🐱
     const bLob = makeBtn('lq-small lq-lob', '🎂', 'LOB');   // 🎂 lob lourd (auto-vise)
     const bDash = makeBtn('lq-small lq-dash', '»', 'DASH'); // » dash (ruee + i-frames)
-    bindHold(bJump, KEY.jump); bindHold(bShoot, KEY.shoot);
-    bindHold(bCat, KEY.cat); bindHold(bLob, KEY.lob); bindHold(bDash, KEY.dash);
+    bindHold(bJump, 'jump'); bindHold(bShoot, 'shoot');
+    bindHold(bCat, 'cat'); bindHold(bLob, 'lob'); bindHold(bDash, 'dash');
 
     // Coin : pause/quitter (HG)
     const bPause = makeBtn('lq-corner lq-pause', '❚❚');  // ❚❚
-    bindHold(bPause, KEY.quit);
+    bindHold(bPause, 'quit');
     const jumpLabel = bJump.querySelector('.lq-s');
 
     root.append(bL, bR, bDown, bDash, bLob, bCat, bShoot, bJump, bPause);
@@ -210,7 +214,7 @@
         hadCat = sig;
         root.classList.toggle('lq-no-cat', !cat);
         bCat.querySelector('.lq-g').textContent = ab.ally === 'students' ? '🎓' : '🐱';
-        bLob.querySelector('.lq-g').textContent = kit === 'guitar' ? '🎸' : '🎂';
+        bLob.querySelector('.lq-g').textContent = kit === 'guitar' ? '🎸' : (kit === 'chili' ? '🥜' : '🎂');   // chili kit: peanut-butter jar
       }
       requestAnimationFrame(tick);
     };

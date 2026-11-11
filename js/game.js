@@ -48,6 +48,8 @@
   // KIT de personnage (CONFIG.kits[CHARACTER.kit]) : remplace ESPACE / X / C.
   const KIT = () => (CHARACTER.kit && C.kits && C.kits[CHARACTER.kit]) || null;
   const isGuitar = () => CHARACTER.kit === 'guitar';
+  // ORIANE kit (CONFIG.kits.chili): SPACE = chili peppers, X = rolling peanut-butter jar.
+  const isChili = () => CHARACTER.kit === 'chili';
   const medalKeys = () => hasAlly() ? ['t', 'd', 's'] : ['t', 'd'];
   const LEVELS = window.LEVELS;
   const SAVEAPI = window.LQ_SAVE;
@@ -160,6 +162,8 @@
   const onConfirm = (cb) => ['space', 'enter'].concat(C.controls.jump).forEach((k) => onKeyPress(k, cb));
   // Retour a l'ecran precedent (ESC) pour les menus. En jeu, ESC ouvre plutot la confirmation de sortie.
   const onBack = (cb) => onKeys(C.controls.quit, cb);
+  // On-screen label of an action's main key (player-configurable, js/controls.js)
+  const keyLabel = (id) => (window.LQ_CONTROLS ? LQ_CONTROLS.primary(id) : String((C.controls[id] || [])[0] || '--').toUpperCase());
 
   // ---------------------------------------------------------------------
   //  CHARGEMENT DES ASSETS (les sprites de CONFIG.anims sont des feuilles)
@@ -210,11 +214,38 @@
   }
 
   // chargement : chaque sprite herite des anims de son nom de base
-  SPRITE_NAMES.forEach((n) => {
+  function registerSprite(n, src) {
     const a = C.anims && C.anims[baseName(n)];
-    if (a) loadSprite(n, SPR_SRC(n), { sliceX: a.sliceX || 1, sliceY: a.sliceY || 1, anims: a.anims || {} });
-    else loadSprite(n, SPR_SRC(n));
+    if (a) loadSprite(n, src, { sliceX: a.sliceX || 1, sliceY: a.sliceY || 1, anims: a.anims || {} });
+    else loadSprite(n, src);
+  }
+  // LAZY GPU UPLOAD (perf). Big pictures (bg_* panoramas / screens, boss_*
+  //  sheets: ~70% of all pixels) used to be decoded + uploaded at boot for
+  //  EVERY campaign (~600 ms, ~190 MB of textures). They now stay registered by
+  //  NAME only (hasSprite() is unchanged) and are loaded on FIRST USE:
+  //  sprite()/drawSprite() are wrapped below, KAPLAY defers play()/drawing until
+  //  the texture is ready. The 'game' scene waits for its level's pictures
+  //  before building (band layers measure their sprites), see levelPictures().
+  const LAZY_SRC = new Map();
+  const LIGHT_BG = /^bg_(cloud|mountains|hills|field|title)$/;   // small shared layers + title: at boot
+  const isHeavy = (n) => /^(bg_|boss_)/.test(n) && !LIGHT_BG.test(n);
+  SPRITE_NAMES.forEach((n) => {
+    if (window.ASSETS && isHeavy(n)) LAZY_SRC.set(n, SPR_SRC(n));
+    else registerSprite(n, SPR_SRC(n));
   });
+  function wantSprite(n) {
+    const src = LAZY_SRC.get(n);
+    if (src === undefined) return;
+    LAZY_SRC.delete(n);
+    registerSprite(n, src);
+  }
+  const wantSprites = (list) => list.forEach((n) => { if (typeof n === 'string') wantSprite(n); });
+  const spriteReady = (n) => { wantSprite(n); const a = getSprite(n); return !a || !!a.data; };
+  {
+    const sprite0 = window.sprite, drawSprite0 = window.drawSprite;
+    window.sprite = (src, opt) => { if (typeof src === 'string') wantSprite(src); return sprite0(src, opt); };
+    window.drawSprite = (o) => { if (o && typeof o.sprite === 'string') wantSprite(o.sprite); return drawSprite0(o); };
+  }
 
   // Sprite-grille SANS clip d'anim (ex. bg_cloud 4x3 = 12 nuages) = banque de
   //  variantes statiques : renvoie un index de frame au hasard, sinon null
@@ -264,12 +295,14 @@
     const prefs = (SV && SV.loadPrefs) ? SV.loadPrefs() : {};
     if (prefs.sfx === false) C.audio.enabled = false;
     if (prefs.music === false) C.audio.music = false;
-    const toggles = {};
-    (C.controls.muteSfx || []).forEach((k) => { toggles[k] = 'sfx'; });
-    (C.controls.muteMusic || []).forEach((k) => { toggles[k] = 'music'; });
+    // read LIVE: the keys can be rebound at any time (scene 'controls', js/controls.js)
+    const CTL = window.LQ_CONTROLS;
+    const keyOf = (e) => (CTL ? CTL.fromEvent(e) : (e.key || '').toLowerCase());
     document.addEventListener('keydown', (e) => {
       if (e.repeat || e.ctrlKey || e.altKey || e.metaKey) return;
-      const what = toggles[(e.key || '').toLowerCase()];
+      const k = keyOf(e);
+      const what = (C.controls.muteSfx || []).indexOf(k) >= 0 ? 'sfx'
+        : ((C.controls.muteMusic || []).indexOf(k) >= 0 ? 'music' : null);
       if (!what) return;
       if (what === 'sfx') {
         C.audio.enabled = !C.audio.enabled;
@@ -458,7 +491,8 @@
     const dmg = (opts.damage != null) ? opts.damage : ammo.damage;     // l'arsenal fournit le degat (graines/patisseries)
     const b = add([
       sprite(sname), artScale(opts.projScale || 1),
-      pos(p.pos.x + fx * 22, p.pos.y - TS * 0.6),
+      // origin: a custom muzzle (Oriane's chili cannon on the bike) or the hand
+      opts.origin ? pos(p.pos.x + fx * opts.origin.x, p.pos.y + opts.origin.y) : pos(p.pos.x + fx * 22, p.pos.y - TS * 0.6),
       anchor('center'), area(),
       offscreen({ distance: 220, destroy: true }),
       'pbullet',
@@ -468,8 +502,11 @@
         bossDmg: (opts.bossDmg != null) ? opts.bossDmg : null,
         // ONDULATION (notes de guitare de Marcos) : decalage sinusoidal
         //  perpendiculaire a la course, amplitude waveAmp px, pulsation waveFreq.
-        waveAmp: opts.waveAmp || 0, waveFreq: opts.waveFreq || 0, wavePh: opts.wavePhase || 0, waveT: 0 },
+        waveAmp: opts.waveAmp || 0, waveFreq: opts.waveFreq || 0, wavePh: opts.wavePhase || 0, waveT: 0,
+        // SPIN (Oriane's chili peppers): degrees per second, in the throw direction.
+        spin: (opts.spin || 0) * fx },
     ]);
+    if (opts.spin) b.use(rotate(rand(0, 360)));
     if (opts.flame) { try { b.use(color(255, 138, 40)); } catch (_) {} }   // graine/gateau ENFLAMME : teinte chaude
     playIfAnim(b, sname);
     if (traj === 'arc') {                       // en cloche (lob lourd) : puissance auto-visee -> portee
@@ -482,6 +519,7 @@
     b.onUpdate(() => {
       if (b.traj === 'arc') b.vy += C.shot.arcGravity * dt();
       b.pos.x += b.vx * dt(); b.pos.y += b.vy * dt();
+      if (b.spin) b.angle += b.spin * dt();
       if (b.waveAmp) {                          // derivee du sinus -> oscille autour de la trajectoire droite
         b.waveT += dt();
         b.pos.y += b.waveAmp * b.waveFreq * Math.cos(b.waveT * b.waveFreq + b.wavePh) * dt();
@@ -538,6 +576,19 @@
   // TIR DE BASE = GRAINES (ESPACE, gratuit). La PUISSANCE (p.power) pilote le
   //  nombre de graines + l'eventail + le feu/percage ; la CADENCE (p.rate) pilote
   //  le delai entre tirs (pose au point d'appel, cf. fireCd). cf. CONFIG.arsenal.graines.
+  // Muzzle flash of Oriane's chili cannon: a short hot puff that follows the bike.
+  function cannonFlash(p, origin, hot) {
+    const fx = p.facing >= 0 ? 1 : -1;
+    const f = add([circle(hot ? 9 : 7), pos(p.pos.x + fx * (origin.x + 4), p.pos.y + origin.y),
+      anchor('center'), scale(1), color(255, hot ? 150 : 214, hot ? 40 : 90), opacity(0.9), z(31), { t: 0 }]);
+    f.onUpdate(() => {
+      f.t += dt();
+      f.pos.x = p.pos.x + fx * (origin.x + 4 + f.t * 60); f.pos.y = p.pos.y + origin.y;
+      f.opacity = 0.9 * (1 - f.t / 0.12); f.scale = vec2(1 + f.t * 6);
+      if (f.t >= 0.12) destroy(f);
+    });
+  }
+
   function fireBase(p) {
     const A = (C.arsenal && C.arsenal.graines) || {};
     const lv = Math.max(1, Math.min((A.levels && A.levels.length) || 1, p.power || 1));
@@ -558,6 +609,23 @@
         });
       }
       guitarPluck(n);
+      return;
+    }
+    const CK = isChili() && KIT() && KIT().chili;
+    if (CK) {                                   // ORIANE: spinning chili peppers (same leveling)
+      const want = L.flame ? CK.fire : CK.sprite, wantFb = L.flame ? CK.fallbackFire : CK.fallback;
+      const spr = hasSprite(want) ? want : wantFb;
+      // on the bike: out of the CHILI CANNON (muzzle on the handlebars)
+      const origin = (p.equipped === 'velo' && CK.bikeMuzzle) ? CK.bikeMuzzle : null;
+      for (let i = 0; i < n; i++) {
+        const off = (n === 1) ? 0 : (i - (n - 1) / 2) * (L.spread || 0);
+        playerShoot('graine', 1, {
+          angleOffset: off, damage: L.damage || 1, speed: A.speed, sprite: spr,
+          pierce: L.pierce || 0, projScale: CK.scale || 1, channel: 'seed', bossDmg: bossTick,
+          spin: CK.spin || 0, silent: i > 0, origin,
+        });
+      }
+      if (origin && CK.muzzleFlash) cannonFlash(p, origin, L.flame);
       return;
     }
     for (let i = 0; i < n; i++) {
@@ -589,6 +657,7 @@
     if (!p || !p.exists()) return;
     if ((p.lobCd || 0) > 0) return;
     if (isGuitar()) { powerChord(auto ? 1 : power); return; }   // MARCOS : onde de choc centree
+    if (isChili()) { rollJar(auto ? 1 : power); return; }        // ORIANE: rolling peanut-butter jar
     const A = (C.arsenal && C.arsenal.patisseries) || {};
     const lv = Math.max(1, Math.min((A.levels && A.levels.length) || 1, p.power || 1));
     const L = (A.levels && A.levels[lv - 1]) || { sprite: 'ammo_gateau', scale: 1, radius: 94, damage: 3, cost: 30, secondary: 0 };
@@ -686,6 +755,119 @@
     EHOTS.forEach((h) => { if (h.exists() && h.pos.dist(c) < R) { addPoof(h.pos.x, h.pos.y); destroy(h); } });
     // pose power chord (frames 2-3 de marcos_guitar) + cooldown
     p.throwT = 0.42; p.throwReplay = true; p.chordPose = 0.42;
+    const A = (C.arsenal && C.arsenal.patisseries) || {};
+    const cad = A.cadence || [0.8];
+    p.lobCd = cad[Math.max(1, Math.min(cad.length, p.rate || 1)) - 1] || 0.8;
+  }
+
+  // =====================================================================
+  //  CHILI KIT (Oriane) — X = PEANUT-BUTTER JAR that ROLLS along the ground.
+  //  Grid-driven (no body): follows the surface under it (ground, decks,
+  //  hazards), falls off ledges, bounces off `bounces` walls then splats.
+  //  Crushes every enemy on its path (one hit each, up to `pierce`), spares
+  //  NPCs, splats on the boss (small AoE, 'aoe' channel). Power level =
+  //  size / damage / range; X charge = rolling speed. Costs sun.
+  //  Laura and Marcos never get here (isChili() false). cf. CONFIG.kits.chili.jar
+  // =====================================================================
+  const ROLL_SURF = { '=': 1, '-': 1, 'x': 1, '^': 1, '%': 1, '~': 1 };
+  const WALL_CH = { '=': 1, '^': 1 };
+  // top of the first rolling surface at/below fromY in column x (null = none)
+  function rollSurfaceY(x, fromY) {
+    const grid = LEVEL && LEVEL.grid;
+    if (!grid) return null;
+    const c = Math.floor(x / TS);
+    if (c < 0 || c >= (grid[0] || '').length) return null;
+    for (let r = Math.max(0, Math.floor(fromY / TS)); r < grid.length; r++) {
+      if (ROLL_SURF[grid[r] && grid[r][c]]) return r * TS;
+    }
+    return null;
+  }
+  // solid wall tile at a world point? (out of the map sideways = wall)
+  function rollWallAt(x, y) {
+    const grid = LEVEL && LEVEL.grid;
+    if (!grid) return false;
+    const c = Math.floor(x / TS), r = Math.floor(y / TS);
+    if (c < 0 || c >= (grid[0] || '').length) return true;
+    if (r < 0 || r >= grid.length) return false;
+    return !!WALL_CH[grid[r][c]];
+  }
+  const bossesIn = (c, radius) => get('boss').filter((bo) => bo.exists() && !bo.intangible && blastReaches(bo, c, radius));
+  // Peanut-butter splat: small AoE on enemies + boss, clears enemy shots.
+  //  NO friendly fire and NO NPC damage (unlike the pastry blast).
+  function jarSplat(x, y, radius, dmg) {
+    const c = vec2(x, y);
+    const cols = [[196, 140, 70], [150, 98, 44], [232, 190, 120]];
+    for (let i = 0; i < 12; i++) {
+      const a = (i / 12) * Math.PI * 2 + rand(-0.2, 0.2), cc = cols[i % cols.length];
+      add([circle(rand(3, 6)), color(cc[0], cc[1], cc[2]), opacity(1), pos(x, y), anchor('center'),
+        move(vec2(Math.cos(a), Math.sin(a) * 0.7 - 0.3), rand(120, 260)), lifespan(rand(0.3, 0.5), { fade: 0.25 }), z(46), 'fx']);
+    }
+    add([circle(radius * 0.55), pos(x, y), anchor('center'), color(cols[0][0], cols[0][1], cols[0][2]), opacity(0.5),
+      lifespan(0.18, { fade: 0.15 }), z(45), 'fx']);
+    safeShake(6); sfx('spell');
+    get('enemy').forEach((e) => { if (e.exists() && blastReaches(e, c, radius)) hitEnemy(e, { dmg }); });
+    bossesIn(c, radius).forEach((bo) => hitBoss(bo, { dmg, channel: 'aoe', pos: c }));
+    EHOTS.forEach((h) => { if (h.exists() && h.pos.dist(c) < radius) { addPoof(h.pos.x, h.pos.y); destroy(h); } });
+  }
+  function rollJar(pw) {
+    const p = PLAYER;
+    if (!p || !p.exists()) return;
+    const J = (KIT() && KIT().jar) || {};
+    const levels = J.levels || [{ scale: 1, damage: 2, pierce: 4, range: 600, splat: 80, cost: 30 }];
+    const L = levels[Math.max(1, Math.min(levels.length, p.power || 1)) - 1];
+    if (C.sun.enabled && p.sun < (L.cost || 0)) { flashMsg('PAS ASSEZ D ENERGIE'); return; }
+    if (C.sun.enabled) p.sun = Math.max(0, p.sun - (L.cost || 0));
+    const dir = p.facing >= 0 ? 1 : -1;
+    const cmin = J.chargeMin != null ? J.chargeMin : 0.6;
+    const speed = (J.speed || 380) * (cmin + (1 - cmin) * Math.max(0, Math.min(1, pw == null ? 1 : pw)));
+    const spr = hasSprite(J.sprite) ? J.sprite : (J.fallback || 'ammo_gateau');
+    const R = (J.radius || 17) * (L.scale || 1);             // rolling radius (px)
+    const jar = add([
+      sprite(spr), artScale((L.scale || 1) * (J.spriteScale || 1)), pos(p.pos.x + dir * 26, p.pos.y - R),
+      anchor('center'), rotate(0), area({ scale: vec2(0.85, 0.85) }), z(41),
+      offscreen({ distance: 300, destroy: true }), 'pjar',
+      { vx: dir * speed, vy: 0, dist: 0, bounces: J.bounces != null ? J.bounces : 1, hit: new Set(),
+        pierce: L.pierce || 4, life: J.life || 4 },
+    ]);
+    const done = () => {
+      if (!jar.exists()) return;
+      const x = jar.pos.x, y = jar.pos.y;
+      destroy(jar);
+      jarSplat(x, y, L.splat || 80, L.damage || 2);
+    };
+    jar.onCollide('enemy', (e) => {
+      if (!jar.exists() || jar.hit.has(e)) return;
+      jar.hit.add(e);
+      hitEnemy(e, { exists: () => false, dmg: L.damage || 2 });
+      if (--jar.pierce <= 0) done();
+    });
+    jar.onCollide('boss', (bo) => { if (!bo.intangible) done(); });
+    jar.onUpdate(() => {
+      const d = dt();
+      jar.life -= d;
+      if (jar.life <= 0 || jar.dist > (L.range || 600)) { done(); return; }
+      const nx = jar.pos.x + jar.vx * d;
+      // wall ahead (at the jar's centre height) -> bounce, then splat
+      if (rollWallAt(nx + Math.sign(jar.vx) * R, jar.pos.y)) {
+        if (jar.bounces-- > 0) { jar.vx = -jar.vx * 0.8; sfx('jump'); } else done();
+        return;
+      }
+      jar.pos.x = nx; jar.dist += Math.abs(jar.vx * d);
+      EHOTS.forEach((h) => { if (h.exists() && h.pos.dist(jar.pos) < R + 10) { addPoof(h.pos.x, h.pos.y); destroy(h); } });
+      // follow the surface under the jar; fall when it is lower / missing
+      const sy = rollSurfaceY(jar.pos.x, jar.pos.y);
+      if (sy == null || sy > jar.pos.y + R + 2) {
+        jar.vy += C.gravity * d;
+        jar.pos.y += jar.vy * d;
+        if (sy != null && jar.pos.y + R >= sy) { jar.pos.y = sy - R; jar.vy = 0; }
+        if (jar.pos.y > LEVEL.height + 80) { destroy(jar); return; }
+      } else {
+        jar.pos.y = sy - R; jar.vy = 0;
+      }
+      jar.angle += (jar.vx * d / R) * (180 / Math.PI);       // rolls without slipping
+    });
+    p.throwT = 0.32; p.throwReplay = true;
+    sfx('shoot');
     const A = (C.arsenal && C.arsenal.patisseries) || {};
     const cad = A.cadence || [0.8];
     p.lobCd = cad[Math.max(1, Math.min(cad.length, p.rate || 1)) - 1] || 0.8;
@@ -1014,9 +1196,56 @@
   //  pile a la surface -> meme geometrie, mais des centaines de body/area en moins.
   //  La tuile n'est qu'un sprite, cache hors-ecran (KAPLAY ne cull pas tout seul).
   const SOIL_LIFT = 8;
+  // =====================================================================
+  //  STATIC DECOR BATCHING (perf). Ground tiles, panel caps / legs and column
+  //  shades used to be ONE game object each (~800 on a big level): even hidden
+  //  off-screen they were walked every frame by the broadphase, the update loop
+  //  and the z-sort. Now each z layer is ONE object whose onDraw only draws the
+  //  items of the columns around the camera, in insertion order (= same
+  //  stacking as before). An item handle keeps exists() / destroy() so the
+  //  callers that remove decor (crumbling panels, shade recast) are unchanged.
+  //  Animated tiles and blinking breakable caps stay real objects.
+  // =====================================================================
+  let DECO_LAYERS = new Map();      // z -> layer, reset by buildLevel
+  let DECO_SEQ = 0;
+  function decoLayer(zv) {
+    let L = DECO_LAYERS.get(zv);
+    if (L) return L;
+    L = { cols: [], margin: TS * 2, vis: [] };
+    DECO_LAYERS.set(zv, L);
+    add([pos(0, 0), z(zv), 'decobatch']).onDraw(() => {
+      const cx = getCam().x, h = C.width / 2;
+      const c0 = Math.max(0, Math.floor((cx - h - L.margin) / TS));
+      const c1 = Math.min(L.cols.length - 1, Math.ceil((cx + h + TS * 2) / TS));
+      const vis = L.vis; vis.length = 0;
+      for (let c = c0; c <= c1; c++) {
+        const l = L.cols[c];
+        if (l) for (let i = 0; i < l.length; i++) if (!l[i].dead) vis.push(l[i]);
+      }
+      vis.sort((a, b) => a.seq - b.seq);
+      for (let i = 0; i < vis.length; i++) vis[i].draw();
+    });
+    return L;
+  }
+  // margin = how far LEFT of the screen an item anchored in column `col` can
+  //  still be visible (wide caps, shades leaning to the right).
+  function addDeco(zv, col, draw, margin) {
+    const L = decoLayer(zv);
+    if (margin && margin > L.margin) L.margin = margin;
+    const it = { seq: DECO_SEQ++, draw, dead: false, exists() { return !this.dead; }, destroy() { this.dead = true; } };
+    (L.cols[col] = L.cols[col] || []).push(it);
+    return it;
+  }
+
   function addSolid(x, y, spr) {
-    playIfAnim(add([sprite(spr), artScale(), pos(x, y - SOIL_LIFT), anchor('topleft'),
-      offscreen({ hide: true, distance: TS * 2 }), z(-1), 'soiltile']), spr);
+    const a = C.anims && C.anims[baseName(spr)];
+    if (a && a.anims) {                    // animated ground tile: keep a real object
+      playIfAnim(add([sprite(spr), artScale(), pos(x, y - SOIL_LIFT), anchor('topleft'),
+        offscreen({ hide: true, distance: TS * 2 }), z(-1), 'soiltile']), spr);
+      return;
+    }
+    const opt = { sprite: spr, pos: vec2(x, y - SOIL_LIFT), anchor: 'topleft', scale: vec2(1 / ART) };
+    addDeco(-1, Math.floor(x / TS), () => drawSprite(opt), TS * 4);
   }
 
   // COLLISION DU SOL FUSIONNEE : un collider invisible par SEGMENT horizontal de
@@ -1219,17 +1448,21 @@
     //  pour les niveaux interieurs (LEVEL.theme.panelLeg, ex. 'shelf_leg').
     const leg0 = (LEVEL && LEVEL.theme && LEVEL.theme.panelLeg) || 'panel_leg';
     const leg = hasSprite(leg0) ? leg0 : 'panel_leg';          // pied dedie pas encore embarque (bamboo_leg) -> pied de panneau
-    if (legH > 4 && hasSprite(leg)) {                         // pieds etires jusqu'au sol
-      const comps = [sprite(leg), pos(cx, y + CAP_LIP), anchor('top'),
-        scale(vec2(1 / ART, (legH / LEG_NAT_H) / ART)), z(-1.2),
-        offscreen({ hide: true, distance: decoMargin }), 'paneldeco'];
-      if (tint) comps.push(color(tint[0], tint[1], tint[2]));
-      objs.push(add(comps));
+    const tcol = tint ? rgb(tint[0], tint[1], tint[2]) : undefined;
+    if (legH > 4 && hasSprite(leg)) {                         // pieds etires jusqu'au sol (batched decor)
+      const lo = { sprite: leg, pos: vec2(cx, y + CAP_LIP), anchor: 'top',
+        scale: vec2(1 / ART, (legH / LEG_NAT_H) / ART), color: tcol };
+      objs.push(addDeco(-1.2, c, () => drawSprite(lo), TS * 3));
     }
-    const capComps = [sprite(spr), artScale(), pos(cx, y - CAP_WALK_Y), anchor('top'), z(-1),
-      offscreen({ hide: true, distance: decoMargin }), 'paneldeco'];
-    if (tint) capComps.push(color(tint[0], tint[1], tint[2]));
-    const cap = add(capComps);
+    // breakable caps blink (cap.opacity) -> real object; the others are batched
+    if (tint) {
+      const cap = add([sprite(spr), artScale(), pos(cx, y - CAP_WALK_Y), anchor('top'), z(-1),
+        offscreen({ hide: true, distance: decoMargin }), color(tint[0], tint[1], tint[2]), 'paneldeco']);
+      objs.push(cap);
+      return { cap, objs };
+    }
+    const co = { sprite: spr, pos: vec2(cx, y - CAP_WALK_Y), anchor: 'top', scale: vec2(1 / ART) };
+    const cap = addDeco(-1, c, () => drawSprite(co), TS * 4);
     objs.push(cap);
     return { cap, objs };
   }
@@ -1275,7 +1508,7 @@
       for (let i = 0; i < 5; i++) addPoof(t.pos.x + rand(4, TS - 4), t.pos.y + rand(4, TS - 4));
       safeShake(3);
       const gc = Math.round(t.pos.x / TS), gr = Math.round(t.pos.y / TS);
-      (t.deco || []).forEach((o) => { if (o.exists()) destroy(o); });
+      (t.deco || []).forEach((o) => { if (o.exists()) o.destroy(); });   // real objects or batched decor handles
       destroy(t);
       if (LEVEL && LEVEL.grid && LEVEL.grid[gr]) {   // panneau disparu -> son ombre aussi
         LEVEL.grid[gr][gc] = ' ';
@@ -2820,7 +3053,9 @@
     (th.layers || []).forEach((spec0) => {
       // spec.fallback : couche de repli tant que l'art dedie n'est pas embarque
       //  (fonds Imagen de la campagne Marcos). Une couche sans sprite ni repli est ignoree.
-      const spec = (!hasSprite(spec0.sprite) && spec0.fallback && hasSprite(spec0.fallback))
+      //  sprite / fallback may be a seq list (panorama halves): all pieces must exist.
+      const has = (s) => (Array.isArray(s) ? s.length > 0 && s.every(hasSprite) : hasSprite(s));
+      const spec = (!has(spec0.sprite) && spec0.fallback && has(spec0.fallback))
         ? Object.assign({}, spec0, { sprite: spec0.fallback }, spec0.fallbackOpts || {}) : spec0;
       if (spec.fullscreen && hasSprite(spec.sprite)) {
         add([sprite(spec.sprite, { width: C.width, height: C.height }), pos(0, 0), fixed(),
@@ -2966,6 +3201,7 @@
     PLAYER = null;     // sans ca, le garde-fou "Pas de @ dans la map" etait mort des la 2e partie
     CAT_REF = null;    // refs de la partie precedente (les objets sont detruits par go())
     BOSS_LIST = [];
+    DECO_LAYERS = new Map();   // batched decor layers die with the previous scene
     EHOTS.clear();     // filet : si la teardown de scene ne declenche pas onDestroy
     HEAD_DECKS = {};   // nouveau niveau -> nouvelles pioches de tetes (sans remise)
     let cols = 0;
@@ -3084,6 +3320,10 @@
           case 'D': spawnEnemy('dossiers', cx, groundY); break;               // IMMOBILE
           // --- campagne Marcos (Java) ---
           case 'r': spawnEnemy('rat', cx, groundY); break;                    // SOL : rat tres rapide
+          // --- ORIANE campaign ---
+          case 'v': spawnEnemy('rlogo', cx, groundY); break;                  // SHOOTER: R logo (SticsRPacks)
+          case 'j': spawnEnemy('javacup', cx, groundY); break;                // GROUND: Java coffee cup charger
+          case 'h': spawnEnemy('glitch', cx, groundY - TS * 1.6); break;      // FLYER: pixel bug
           case 'u': {                                                          // DURIAN : au sol, ou SUSPENDU si la case du dessous est vide
             const below = (rows[r + 1] || '')[c] || ' ';
             spawnEnemy('durian', cx, groundY, { hanging: '=-x^%~'.indexOf(below) === -1 });
@@ -3180,7 +3420,7 @@
   function castColumnShade(c) {
     if (!LEVEL || !LEVEL.grid) return;
     const reg = LEVEL.shadeByCol || (LEVEL.shadeByCol = {});
-    if (reg[c]) reg[c].forEach((o) => { if (o.exists()) destroy(o); });
+    if (reg[c]) reg[c].forEach((o) => { if (o.exists()) o.destroy(); });   // real objects or batched decor handles
     reg[c] = [];
     const grid = LEVEL.grid, H = grid.length, yBot = H * TS;
     let tr = -1;
@@ -3205,10 +3445,13 @@
     //  regen + indice qu'il existe un etage secret). inShade() est deja base
     //  grille (insensible a l'ecran) ; ceci aligne le VISUEL dessus.
     const sMargin = TS + dx + Math.max(0, (LEVEL ? LEVEL.height : 0) - C.height);
-    reg[c].push(add([pos(x0, 0), polygon([                  // parallelogramme penche
-      vec2(0, yTop), vec2(TS, yTop), vec2(TS + dx, yBot), vec2(dx, yBot),
-    ]), color(40, 56, 100), opacity(0.24), z(-0.5), offscreen({ hide: true, distance: sMargin }), 'shade', { col: c }]));
-    reg[c].push(add([rect(TS, 7), pos(x0, yTop), color(22, 30, 60), opacity(0.20), z(-0.5), offscreen({ hide: true, distance: sMargin }), 'shade', { col: c }])); // contact
+    // batched decor (cf. addDeco): parallelogram leaning right + contact strip
+    const pts = [vec2(x0, yTop), vec2(x0 + TS, yTop), vec2(x0 + TS + dx, yBot), vec2(x0 + dx, yBot)];
+    const scol = rgb(40, 56, 100), ccol = rgb(22, 30, 60), cpos = vec2(x0, yTop);
+    reg[c].push(addDeco(-0.5, c, () => {
+      drawPolygon({ pts, color: scol, opacity: 0.24 });
+      drawRect({ pos: cpos, width: TS, height: 7, color: ccol, opacity: 0.20 });
+    }, sMargin));
   }
 
   // Laura est-elle A L'OMBRE PROJETEE d'un panneau ? Le soleil est rasant :
@@ -3271,7 +3514,7 @@
     function panel(x, y, w, h) {
       R(x + 2, y + 4, w, h, { radius: 10, color: COL.ink, opacity: 0.40 });
       R(x, y, w, h, { radius: 10, color: COL.panel, opacity: 0.62 });
-      R(x, y, w, h, { radius: 10, fill: false, outline: { width: 2, color: rgb(210, 155, 72) } });
+      R(x, y, w, h, { radius: 10, fill: false, outline: { join: 'miter', width: 2, color: rgb(210, 155, 72) } });
     }
 
     // CACHE DE LAYOUT TEXTE : drawText refait un formatText (layout complet,
@@ -3324,28 +3567,30 @@
         R(x, y, barW, h, { radius: r, color: fill });
         R(x + 2.5, y + 1.5, Math.max(2, barW - 5), Math.max(1, h * 0.32), { radius: r, color: hi, opacity: 0.9 });
       }
-      R(x, y, w, h, { radius: r, fill: false, outline: { width: 1.5, color: COL.ink } });
+      R(x, y, w, h, { radius: r, fill: false, outline: { join: 'miter', width: 1.5, color: COL.ink } });
     }
 
+    const keycapW = (lbl) => 12 + lbl.length * 7;
     function keycap(lbl, cx, cy) {
       if (TOUCH_ON) return;
-      const w = 12 + lbl.length * 7, h = 17;
+      const w = keycapW(lbl), h = 17;
       R(cx - w / 2, cy - h / 2 + 2, w, h, { radius: 4, color: COL.ink, opacity: 0.45 });
       R(cx - w / 2, cy - h / 2, w, h, { radius: 4, color: COL.cream, opacity: 0.95 });
-      R(cx - w / 2, cy - h / 2, w, h, { radius: 4, fill: false, outline: { width: 1.5, color: COL.ink } });
-      drawText({ text: lbl, pos: vec2(cx, cy + 0.5), anchor: 'center', size: 10, color: COL.ink });
+      R(cx - w / 2, cy - h / 2, w, h, { radius: 4, fill: false, outline: { join: 'miter', width: 1.5, color: COL.ink } });
+      // cached formatted text (drawText re-laid the glyphs out every frame)
+      pushTransform(); pushTranslate(cx, cy + 0.5); drawFormattedText(fmtCached(lbl, 10, 'center', COL.ink, 1)); popTransform();
     }
 
     function chev(x, y, on, col, pulse) {
       const pts = [vec2(x - 4, y - 6), vec2(x + 5, y), vec2(x - 4, y + 6)];
       if (on && pulse) drawCircle({ pos: vec2(x, y), radius: 9, color: col, opacity: 0.35 });
       drawPolygon({ pts, color: on ? col : COL.dim, opacity: on ? 1 : 0.45 });
-      if (on) drawPolygon({ pts, fill: false, outline: { width: 1.2, color: COL.ink } });
+      if (on) drawPolygon({ pts, fill: false, outline: { join: 'miter', width: 1.2, color: COL.ink } });
     }
 
     function pip(x, y, on) {
       drawCircle({ pos: vec2(x, y), radius: 6, color: on ? COL.leaf : COL.ink, opacity: on ? 1 : 0.35 });
-      drawCircle({ pos: vec2(x, y), radius: 6, fill: false, outline: { width: 1.5, color: COL.ink } });
+      drawCircle({ pos: vec2(x, y), radius: 6, fill: false, outline: { join: 'miter', width: 1.5, color: COL.ink } });
     }
 
     function star(x, y, r, col) {
@@ -3430,7 +3675,7 @@
         R(thX - 1.5, sby - 3, 3, sbh + 6, { radius: 1.5, color: COL.cream, opacity: 0.85 });
       }
       const shieldOn = !sunLocked && (C.sun.hitAbsorb || 0) > 0 && p.sun >= C.sun.hitAbsorb;
-      if (shieldOn) drawCircle({ pos: vec2(PL_X + 17, R2Y), radius: 16 + Math.sin(t * 5) * 1.2, fill: false, outline: { width: 2.5, color: COL.goldHi }, opacity: 0.8 });
+      if (shieldOn) drawCircle({ pos: vec2(PL_X + 17, R2Y), radius: 16 + Math.sin(t * 5) * 1.2, fill: false, outline: { join: 'miter', width: 2.5, color: COL.goldHi }, opacity: 0.8 });
       const sunPulse = p._sunCharging ? 1 + Math.sin(t * 6) * 0.14 : 1;
       icon('pickup_sunray', PL_X + 17, R2Y, 26 * sunPulse, { opacity: (p._sunShaded && !p._sunCharging) ? 0.5 : 1 });
 
@@ -3458,7 +3703,7 @@
       // Horloge + temps principal
       const ckx = PR_X + 20, cky = PR_Y + 28;
       drawCircle({ pos: vec2(ckx, cky), radius: 11, color: COL.cream, opacity: 0.9 });
-      drawCircle({ pos: vec2(ckx, cky), radius: 11, fill: false, outline: { width: 1.8, color: COL.ink } });
+      drawCircle({ pos: vec2(ckx, cky), radius: 11, fill: false, outline: { join: 'miter', width: 1.8, color: COL.ink } });
       const aS = lt / 60 * Math.PI * 2 - Math.PI / 2;
       const aM = lt / 3600 * Math.PI * 2 - Math.PI / 2;
       drawLine({ p1: vec2(ckx, cky), p2: vec2(ckx + Math.cos(aS) * 8, cky + Math.sin(aS) * 8), width: 2, color: COL.ink });
@@ -3483,12 +3728,13 @@
 
       let wx = WEP_X + 18;
       // Graine + ESPACE (Marcos : note de guitare)
-      const NK = isGuitar() && KIT() && KIT().notes;
+      const NK = (isGuitar() && KIT() && KIT().notes) || (isChili() && KIT() && KIT().chili);
       const shotIcon = (NK && hasSprite(NK.sprite)) ? NK.sprite : 'ammo_graine';
       icon(shotIcon, wx + 13, WEP_ROW, 28);
       wx += 28;
-      keycap('ESPACE', wx + 30, WEP_ROW);
-      wx += TOUCH_ON ? 16 : 64;
+      const kShoot = keyLabel('shoot');
+      keycap(kShoot, wx + 3 + keycapW(kShoot) / 2, WEP_ROW);
+      wx += TOUCH_ON ? 16 : keycapW(kShoot) + 10;
       drawLine({ p1: vec2(wx, WEP_Y + 9), p2: vec2(wx, WEP_Y + WEP_H - 9), width: 1, color: rgb(115, 78, 42) });
       wx += 16;
       // Patisserie + cout + X
@@ -3499,6 +3745,10 @@
         const CL = KIT().chord.levels; const cl = CL[Math.max(1, Math.min(CL.length, p.power || 1)) - 1];
         PL = { sprite: hasSprite('marcos_guitar') ? 'marcos_guitar' : shotIcon, cost: cl.cost };
       }
+      if (isChili() && KIT() && KIT().jar) {        // Oriane: peanut-butter jar (cost per power level)
+        const JL = KIT().jar.levels; const jl = JL[Math.max(1, Math.min(JL.length, p.power || 1)) - 1];
+        PL = { sprite: hasSprite(KIT().jar.sprite) ? KIT().jar.sprite : 'ammo_gateau', cost: jl.cost };
+      }
       const poor = C.sun.enabled && p.sun < (PL.cost || 0);
       icon(hasSprite(PL.sprite) ? PL.sprite : 'ammo_gateau', wx + 16, WEP_ROW, 30, { opacity: poor ? 0.55 : 1 });
       wx += 34;
@@ -3507,8 +3757,9 @@
       wx += costStr.length * 9 + 4;
       icon('pickup_sunray', wx + 7, WEP_ROW, 15);
       wx += 18;
-      keycap('X', wx + 9, WEP_ROW);
-      wx += TOUCH_ON ? 12 : 24;
+      const kLob = keyLabel('lob');
+      keycap(kLob, wx + keycapW(kLob) / 2, WEP_ROW);
+      wx += TOUCH_ON ? 12 : keycapW(kLob) + 5;
       drawLine({ p1: vec2(wx, WEP_Y + 9), p2: vec2(wx, WEP_Y + WEP_H - 9), width: 1, color: rgb(210, 155, 72) });
       wx += 16;
       // Upgrades puissance + cadence
@@ -3537,8 +3788,9 @@
           drawCircle({ pos: vec2(wx + p.catCharges * 16, WEP_ROW), radius: 1 + 5 * frac, color: COL.leaf, opacity: 0.9 });
         }
         wx += C.cat.maxCharges * 16 + 8;
-        keycap('C', wx + 9, WEP_ROW);
-        wx += TOUCH_ON ? 12 : 24;
+        const kCat = keyLabel('cat');
+        keycap(kCat, wx + keycapW(kCat) / 2, WEP_ROW);
+        wx += TOUCH_ON ? 12 : keycapW(kCat) + 5;
         const savedN = p.saved || 0;
         if ((p.saveFlash || 0) > 0) drawCircle({ pos: vec2(wx + 40, WEP_ROW), radius: 13, color: COL.leaf, opacity: 0.38 });
         inkT('SAUVES ' + savedN, wx, WEP_ROW, 14, savedN > 0 ? COL.leaf : COL.dim);
@@ -3788,10 +4040,36 @@
   // ---------------------------------------------------------------------
   //  SCENE PRINCIPALE (game)
   // ---------------------------------------------------------------------
+  // Pictures a level needs before it is built (lazy GPU upload, cf. LAZY_SRC):
+  //  parallax layers (+ fallbacks), the boss sheets (+ fallbacks; the jury calls
+  //  former bosses as guests), the in-level popup backgrounds.
+  function levelPictures(def) {
+    const out = [];
+    const th = def.theme || {};
+    (th.layers || []).forEach((l) => out.push(l.sprite, l.fallback));
+    const bd = C.bosses[def.boss];
+    if (bd) out.push(bd.sprite, bd.attackSprite, bd.fallback, bd.fallbackAtk);
+    if (def.boss === 'jury') Object.values(C.bosses).forEach((b) => out.push(b.sprite, b.attackSprite));
+    out.push(CAMPAIGN.screens.popup, CAMPAIGN.screens.fallback, 'bg_startlevel');
+    return out.flat().filter((n) => typeof n === 'string' && hasSprite(n));
+  }
+
   scene('game', (levelKey) => {
     CUR_IDX = C.levels.indexOf(levelKey);
     if (CUR_IDX < 0 || !LEVELS[levelKey]) { go('overworld'); return; }
     const def = LEVELS[levelKey];
+    // lazy pictures not decoded yet -> short loading card, then re-enter the scene
+    const pics = levelPictures(def);
+    if (!pics.every(spriteReady)) {
+      add([rect(C.width, C.height), pos(0, 0), color(27, 35, 48)]);
+      add([text('CHARGEMENT...', { size: 22 }), pos(C.width / 2, C.height / 2), anchor('center'), color(255, 236, 190)]);
+      let waited = 0;
+      onUpdate(() => {
+        waited += dt();
+        if (pics.every(spriteReady) || waited > 8) go('game', levelKey);
+      });
+      return;
+    }
     playMusic((def && def.music) || levelKey);   // piste du niveau (niveau1.mid... ou override LEVELS[x].music)
     buildLevel(def);
     if (!PLAYER) { add([text('Pas de @ dans la map !', { size: 24 }), pos(40, 40)]); return; }
@@ -3872,23 +4150,23 @@
         drawRect({ pos: vec2(L, top), width: bw, height: bh, radius: 18, color: CREAMLO });                                  // fond parchemin
         drawRect({ pos: vec2(L, top), width: bw, height: bh * 0.55, radius: 18, color: CREAM });                             // degrade haut
         drawRect({ pos: vec2(L + 8, top + 7), width: bw - 16, height: 3, radius: 2, color: rgb(255, 255, 255), opacity: 0.55 }); // brillance
-        drawRect({ pos: vec2(L, top), width: bw, height: bh, radius: 18, fill: false, outline: { width: 4.5, color: GOLD } });   // cadre dore
-        drawRect({ pos: vec2(L + 6, top + 6), width: bw - 12, height: bh - 12, radius: 13, fill: false, outline: { width: 1.5, color: INKSOFT }, opacity: 0.5 }); // liseré interne
+        drawRect({ pos: vec2(L, top), width: bw, height: bh, radius: 18, fill: false, outline: { join: 'miter', width: 4.5, color: GOLD } });   // cadre dore
+        drawRect({ pos: vec2(L + 6, top + 6), width: bw - 12, height: bh - 12, radius: 13, fill: false, outline: { join: 'miter', width: 1.5, color: INKSOFT }, opacity: 0.5 }); // liseré interne
         [[L + 18, top + 18], [L + bw - 18, top + 18], [L + 18, top + bh - 18], [L + bw - 18, top + bh - 18]].forEach((c) => {     // rivets dores
           drawCircle({ pos: vec2(c[0], c[1]), radius: 5, color: GOLD });
-          drawCircle({ pos: vec2(c[0], c[1]), radius: 5, fill: false, outline: { width: 1.5, color: INK } });
+          drawCircle({ pos: vec2(c[0], c[1]), radius: 5, fill: false, outline: { join: 'miter', width: 1.5, color: INK } });
         });
 
         // 4) ruban "PAUSE" a cheval sur le bord haut + soleil au sommet
         const rbw = 186, rbh = 44, rt = top - rbh / 2;
         drawRect({ pos: vec2(cx - rbw / 2 + 3, rt + 4), width: rbw, height: rbh, radius: rbh / 2, color: rgb(18, 11, 6), opacity: 0.3 });
         drawRect({ pos: vec2(cx - rbw / 2, rt), width: rbw, height: rbh, radius: rbh / 2, color: RED });
-        drawRect({ pos: vec2(cx - rbw / 2, rt), width: rbw, height: rbh, radius: rbh / 2, fill: false, outline: { width: 3, color: REDDK } });
+        drawRect({ pos: vec2(cx - rbw / 2, rt), width: rbw, height: rbh, radius: rbh / 2, fill: false, outline: { join: 'miter', width: 3, color: REDDK } });
         drawRect({ pos: vec2(cx - rbw / 2 + 8, rt + 5), width: rbw - 16, height: 6, radius: 3, color: rgb(255, 255, 255), opacity: 0.18 });
         const eY = rt - 9;                                           // soleil-embleme cresting au-dessus du ruban
         for (let i = 0; i < 8; i++) { const a = -rot * 1.3 + i * Math.PI / 4; drawTriangle({ p1: vec2(cx + Math.cos(a) * 27, eY + Math.sin(a) * 27), p2: vec2(cx + Math.cos(a + 0.16) * 15, eY + Math.sin(a + 0.16) * 15), p3: vec2(cx + Math.cos(a - 0.16) * 15, eY + Math.sin(a - 0.16) * 15), color: GOLD }); }
         drawCircle({ pos: vec2(cx, eY), radius: 13, color: GOLDHI });
-        drawCircle({ pos: vec2(cx, eY), radius: 13, fill: false, outline: { width: 2.5, color: rgb(196, 120, 30) } });
+        drawCircle({ pos: vec2(cx, eY), radius: 13, fill: false, outline: { join: 'miter', width: 2.5, color: rgb(196, 120, 30) } });
         drawCircle({ pos: vec2(cx - 4, eY - 4), radius: 4, color: rgb(255, 255, 255), opacity: 0.5 });
         ink('PAUSE', cx, top + 1, 22, CREAM, 1);
 
@@ -3910,7 +4188,7 @@
           if (glow) drawRect({ pos: vec2(ox - 5, y - oh / 2 - 5), width: ow + 10, height: oh + 10, radius: 16, color: GREEN, opacity: 0.16 + 0.16 * (0.5 + 0.5 * Math.sin(T * 4)) });
           drawRect({ pos: vec2(ox + 3, y - oh / 2 + 4), width: ow, height: oh, radius: 13, color: rgb(18, 11, 6), opacity: 0.16 });
           drawRect({ pos: vec2(ox, y - oh / 2), width: ow, height: oh, radius: 13, color: CREAM });
-          drawRect({ pos: vec2(ox, y - oh / 2), width: ow, height: oh, radius: 13, fill: false, outline: { width: 2.5, color: INKSOFT } });
+          drawRect({ pos: vec2(ox, y - oh / 2), width: ow, height: oh, radius: 13, fill: false, outline: { join: 'miter', width: 2.5, color: INKSOFT } });
           const kw = 104, kh = 32, kx = ox + 12, ky = y - kh / 2;    // keycap (style HUD, en relief)
           drawRect({ pos: vec2(kx, ky + 3), width: kw, height: kh, radius: 8, color: capDk });
           drawRect({ pos: vec2(kx, ky), width: kw, height: kh, radius: 8, color: capCol });
@@ -4009,13 +4287,13 @@
         drawRect({ pos: vec2(L + 5, top + 9), width: bw, height: bh, radius: 20, color: rgb(18, 11, 6), opacity: 0.34 });
         drawRect({ pos: vec2(L, top), width: bw, height: bh, radius: 18, color: CREAMLO });
         drawRect({ pos: vec2(L, top), width: bw, height: bh * 0.55, radius: 18, color: CREAM });
-        drawRect({ pos: vec2(L, top), width: bw, height: bh, radius: 18, fill: false, outline: { width: 4.5, color: GOLD } });
+        drawRect({ pos: vec2(L, top), width: bw, height: bh, radius: 18, fill: false, outline: { join: 'miter', width: 4.5, color: GOLD } });
 
         // ruban KO + soleil
         const rbw = 168, rbh = 44, rt = top - rbh / 2;
         drawRect({ pos: vec2(cx - rbw / 2 + 3, rt + 4), width: rbw, height: rbh, radius: rbh / 2, color: rgb(18, 11, 6), opacity: 0.3 });
         drawRect({ pos: vec2(cx - rbw / 2, rt), width: rbw, height: rbh, radius: rbh / 2, color: RED });
-        drawRect({ pos: vec2(cx - rbw / 2, rt), width: rbw, height: rbh, radius: rbh / 2, fill: false, outline: { width: 3, color: REDDK } });
+        drawRect({ pos: vec2(cx - rbw / 2, rt), width: rbw, height: rbh, radius: rbh / 2, fill: false, outline: { join: 'miter', width: 3, color: REDDK } });
         ink('K.O. !', cx, top + 1, 22, CREAM, 1);
 
         ink('On recommence ?', cx, top + 54, 26, GOLD, 1);
@@ -4034,7 +4312,7 @@
           if (on) drawRect({ pos: vec2(ox - 5, oy - oh / 2 - 5), width: ow + 10, height: oh + 10, radius: 16, color: GREEN, opacity: 0.18 + 0.18 * (0.5 + 0.5 * Math.sin(T * 4)) });
           drawRect({ pos: vec2(ox + 3, oy - oh / 2 + 4), width: ow, height: oh, radius: 13, color: rgb(18, 11, 6), opacity: 0.16 });
           drawRect({ pos: vec2(ox, oy - oh / 2), width: ow, height: oh, radius: 13, color: CREAM });
-          drawRect({ pos: vec2(ox, oy - oh / 2), width: ow, height: oh, radius: 13, fill: false, outline: { width: on ? 3.5 : 2.5, color: on ? GREENDK : INKSOFT } });
+          drawRect({ pos: vec2(ox, oy - oh / 2), width: ow, height: oh, radius: 13, fill: false, outline: { join: 'miter', width: on ? 3.5 : 2.5, color: on ? GREENDK : INKSOFT } });
           ink(o.cap, ox + ow / 2, oy - 14, 24, on ? GREENDK : INK, 1);
           drawText({ text: o.sub, pos: vec2(ox + ow / 2, oy + 22), anchor: 'center', size: 15, color: BROWN });
         });
@@ -4200,7 +4478,7 @@
     if (C.sun.enabled && LEVEL.bossesAlive > 0) {
       let drops = 0;
       loop(C.sun.bossDropEvery || 5, () => {
-        if (!PLAYER.exists() || !get('boss').length || drops >= 1) return;
+        if (!PLAYER.exists() || !BOSS_LIST.some((x) => x.exists()) || drops >= 1) return;
         const x = Math.max(TS, Math.min(LEVEL.width - TS, PLAYER.pos.x + rand(-240, 240)));
         const y = PLAYER.pos.y - TS * 0.5 - rand(TS * 0.5, TS * 2.5);
         const it = spawnPickup('sunray', x, y);
@@ -4231,7 +4509,7 @@
       // un seul cafe "de vie" present a la fois (les drops d'invites restent en plus)
       let lifeOut = 0;
       const dropLifeCafe = () => {
-        if (!PLAYER.exists() || !get('boss').length || lifeOut >= 1) return;
+        if (!PLAYER.exists() || !BOSS_LIST.some((x) => x.exists()) || lifeOut >= 1) return;
         if (PLAYER.hp >= PLAYER.maxHp) return;        // deja au plafond -> on n'encombre pas le sol
         const it = spawnPickup('cafe', arenaX(), arenaY());
         if (!it) return;
@@ -4245,7 +4523,7 @@
       //  finale = on serre les dents). Lecture seule de b.hp/b.maxHp (IA dans bosses.js).
       let phaseStep = 0;
       onUpdate(() => {
-        const b = get('boss').find((x) => !x.guest);   // le jury (pas les invites)
+        const b = BOSS_LIST.find((x) => x.exists() && !x.guest);   // le jury (pas les invites)
         if (!b || b.maxHp <= 0) return;
         const crossed = Math.floor((1 - Math.max(0, b.hp) / b.maxHp) * 4);  // 1 a 75%, 2 a 50%, 3 a 25%
         if (crossed > phaseStep && crossed <= 2) { phaseStep = crossed; dropLifeCafe(); }   // SEULEMENT 75% et 50%
@@ -4401,6 +4679,9 @@
         else loco = 'idle';
         const arm = 'hero_' + loco + '_throw';
         if (!CHARACTER.rig && hasSprite(characterSprite(arm))) actOvSpr = arm;
+        // on the bike / rollers WITHOUT a dedicated arm layer (Oriane, Marcos):
+        //  stay on the vehicle sheet while shooting (the projectile still fires)
+        else if (p.equipped) actBody = null;
         else actBody = hasSprite('hero_throw') ? 'hero_throw' : actAmmoSpr;   // idle/saut -> plein-corps
       }
       setActionOverlay(p, actOvSpr, actClip, actReplay);            // (de)pose le calque d'action
@@ -4667,6 +4948,8 @@
     // --- decor : Laura plantee sur l'herbe, en bas a gauche -------------
     menuHero(CHARACTERS.laura, 116, C.height - 54, 1.45, 4);
     menuHero(CHARACTERS.marcos, 228, C.height - 54, 1.3, 4);
+    // Oriane on the right of the CIRAD hut, facing the two others (the start banner covers x 245-735)
+    menuHero(CHARACTERS.oriane, C.width - 92, C.height - 54, 1.3, 4).flipX = true;
 
     // --- titre : grand, dore, contour epais + bob ----------------------
     const titleY = 74;
@@ -4681,8 +4964,19 @@
 
     // --- bandeau bas : controles -------------------------------------
     pill(C.width / 2, C.height - 22, C.width, 56, [26, 18, 12], 0.5, 0, 3);
-    inkText('Q/D ou Fleches : bouger     HAUT : sauter     ESPACE : tir de base', C.width / 2, C.height - 33, 14, CREAM, { outline: 2, z: 6 });
-    inkText('X (maintenir) : lob charge     MAJ : dash     C : chat (Laura)', C.width / 2, C.height - 13, 14, [220, 214, 198], { outline: 2, z: 6 });
+    const CTL = window.LQ_CONTROLS;
+    const mv = CTL ? CTL.movePair() : 'Q/D ou GAUCHE/DROITE';
+    inkText(mv + ' : bouger     ' + keyLabel('jump') + ' : sauter     ' + keyLabel('shoot') + ' : tir de base', C.width / 2, C.height - 33, 14, CREAM, { outline: 2, z: 6 });
+    inkText(keyLabel('lob') + ' (maintenir) : tir special     ' + keyLabel('dash') + ' : dash     ' + keyLabel('cat') + ' : allie (Laura, Marcos)', C.width / 2, C.height - 13, 14, [220, 214, 198], { outline: 2, z: 6 });
+
+    // --- entry to the key configuration screen (T or click) -----------
+    let cfgPill = null;
+    if (!TOUCH_ON) {
+      cfgPill = pill(C.width / 2, 466, 270, 24, [40, 26, 16], 0.7, 12, 5);
+      inkText('T : configurer les touches', C.width / 2, 466, 14, CREAM, { outline: 2, z: 6 });
+      cfgPill.use(area());
+      onKeyPress('t', () => go('controls', { back: 'title' }));
+    }
 
     // --- invite "ESPACE pour commencer" : pastille doree clignotante ---
     const startPill = pill(C.width / 2, 430, 500, 44, [40, 26, 16], 0.78, 22, 5);
@@ -4700,7 +4994,135 @@
 
     const go1 = () => go('characters');
     onConfirm(go1);
-    onClick(go1);
+    onClick(() => (cfgPill && cfgPill.isHovering()) ? go('controls', { back: 'title' }) : go1());
+  });
+
+  // --- CONFIGURATION DES TOUCHES (js/controls.js, preference globale) ---
+  //  Two editable keys per action. Arrows (or the current move/jump/crouch
+  //  keys) move the cursor, ENTER/SPACE/click = rebind the selected slot
+  //  ("press a key"), BACKSPACE clears a secondary key, ESC = back.
+  //  The key capture is a DOM listener in the CAPTURE phase on window that
+  //  swallows the event, so the pressed key never reaches KAPLAY nor the
+  //  S/M mute listener.
+  scene('controls', (opts) => {
+    opts = opts || {};
+    const CTL = window.LQ_CONTROLS;
+    const backTo = () => go(opts.back || 'title');
+    playMusic((C.music || {}).title);
+    setCam(C.width / 2, C.height / 2); setCamAngle(0);
+    if (hasSprite('bg_title')) add([sprite('bg_title', { width: C.width, height: C.height }), pos(0, 0), anchor('topleft'), z(-10)]);
+    add([rect(C.width, C.height), pos(0, 0), color(20, 14, 10), opacity(0.74), z(-9)]);
+    if (!CTL) {
+      add([text('Configuration indisponible', { size: 20 }), pos(C.width / 2, C.height / 2), anchor('center')]);
+      onBack(backTo); onConfirm(backTo);
+      return;
+    }
+
+    const GOLD = rgb(255, 206, 71), CREAM = rgb(255, 244, 219), DIM = rgb(170, 160, 140), RED = rgb(240, 110, 90), INK = rgb(40, 26, 16);
+    const rows = CTL.ACTIONS.map((a) => ({ kind: 'action', a }))
+      .concat([{ kind: 'reset', label: 'Reinitialiser les touches' }, { kind: 'back', label: 'Retour' }]);
+    const Y0 = 100, DY = 27, LX = 150, K1 = 560, K2 = 720;
+    const rowY = (i) => Y0 + i * DY + (rows[i].kind === 'action' ? 0 : 8);
+    let cur = 0, col = 0, capturing = false, swallowUp = null;
+    let msg = '', msgCol = DIM, msgT = 0;
+    const say = (s, c) => { msg = s; msgCol = c || DIM; msgT = 3.5; };
+
+    function onCapture(e) {
+      if (!capturing) {
+        // swallow the keyup of the key just captured (KAPLAY never saw its keydown)
+        if (swallowUp && e.type === 'keyup' && CTL.fromEvent(e) === swallowUp) { e.stopPropagation(); e.preventDefault(); swallowUp = null; }
+        return;
+      }
+      if (e.type !== 'keydown') return;
+      e.stopPropagation(); e.preventDefault();
+      if (e.repeat) return;
+      const k = CTL.fromEvent(e);
+      const row = rows[cur];
+      capturing = false; swallowUp = k;
+      if (k === 'escape') { say('Annule.'); return; }
+      if (k === 'backspace') {
+        if (CTL.clear(row.a.id, col)) say('Touche retiree.');
+        else say('Cette action garde au moins une touche.', RED);
+        return;
+      }
+      const err = CTL.bind(row.a.id, col, k);
+      if (err === 'reserved') say(CTL.label(k) + ' est reservee (quitter / retour).', RED);
+      else if (err) say(CTL.label(k) + ' est la seule touche de "' + err + '" : change-la d abord.', RED);
+      else { say(row.a.label + ' : ' + CTL.label(k), GOLD); sfx('pickup'); }
+    }
+    window.addEventListener('keydown', onCapture, true);
+    window.addEventListener('keyup', onCapture, true);
+    onSceneLeave(() => {
+      window.removeEventListener('keydown', onCapture, true);
+      window.removeEventListener('keyup', onCapture, true);
+    });
+
+    const move = (d) => { if (!capturing) cur = (cur + d + rows.length) % rows.length; };
+    const side = (d) => { if (!capturing) col = Math.max(0, Math.min(1, col + d)); };
+    function activate() {
+      if (capturing) return;
+      const row = rows[cur];
+      if (row.kind === 'back') { backTo(); return; }
+      if (row.kind === 'reset') { CTL.reset(); say('Touches par defaut retablies.', GOLD); sfx('pickup'); return; }
+      capturing = true; say('');
+    }
+    // navigation: arrows always + the player's current move/jump/crouch keys
+    //  (snapshot at scene start: a rebind takes effect for navigation next time)
+    const uniq = (arr) => arr.filter((k, i, a) => a.indexOf(k) === i);
+    onKeys(uniq(['up'].concat(C.controls.jump)), () => move(-1));
+    onKeys(uniq(['down'].concat(C.controls.crouch)), () => move(1));
+    onKeys(uniq(['left'].concat(C.controls.left)), () => side(-1));
+    onKeys(uniq(['right'].concat(C.controls.right)), () => side(1));
+    onKeys(['enter', 'space'], activate);
+    onBack(() => { if (!capturing) backTo(); });
+    onClick(() => {
+      if (capturing) return;
+      const m = mousePos();
+      for (let i = 0; i < rows.length; i++) {
+        if (Math.abs(m.y - rowY(i)) > DY / 2) continue;
+        cur = i;
+        if (rows[i].kind === 'action') {
+          if (Math.abs(m.x - K1) < 70) col = 0;
+          else if (Math.abs(m.x - K2) < 70) col = 1;
+          else return;
+        }
+        activate();
+        return;
+      }
+    });
+
+    let t = 0;
+    onUpdate(() => { t += dt(); if (msgT > 0) msgT -= dt(); });
+    const T = (s, x, y, size, c, anc, op) => drawText({ text: s, pos: vec2(x, y), size, color: c, anchor: anc || 'left', opacity: op == null ? 1 : op });
+    function cap(lbl, cx, cy, on, blink) {
+      const w = Math.max(56, 16 + lbl.length * 10), h = 22;
+      if (on) drawRect({ pos: vec2(cx - w / 2 - 3, cy - h / 2 - 3), width: w + 6, height: h + 6, radius: 6, color: GOLD, opacity: blink ? 0.4 + 0.5 * Math.abs(Math.sin(t * 6)) : 0.9 });
+      drawRect({ pos: vec2(cx - w / 2, cy - h / 2), width: w, height: h, radius: 5, color: lbl === '--' ? rgb(90, 80, 70) : CREAM });
+      T(lbl, cx, cy + 1, 13, lbl === '--' ? DIM : INK, 'center');
+    }
+    onDraw(() => {
+      T('CONFIGURER LES TOUCHES', C.width / 2, 44, 28, GOLD, 'center');
+      T('TOUCHE 1', K1, 76, 12, DIM, 'center'); T('TOUCHE 2', K2, 76, 12, DIM, 'center');
+      rows.forEach((r, i) => {
+        const y = rowY(i), sel = i === cur;
+        if (sel) drawRect({ pos: vec2(LX - 24, y - DY / 2 + 1), width: K2 + 90 - LX + 24, height: DY - 2, radius: 6, color: GOLD, opacity: 0.12 });
+        if (r.kind === 'action') {
+          T(r.a.label, LX, y, 15, sel ? GOLD : CREAM);
+          const ks = CTL.keys(r.a.id);
+          const show = (j) => (capturing && sel && col === j) ? '...' : CTL.label(ks[j]);
+          cap(show(0), K1, y, sel && col === 0, capturing && sel && col === 0);
+          cap(show(1), K2, y, sel && col === 1, capturing && sel && col === 1);
+        } else {
+          T((sel ? '> ' : '') + r.label, C.width / 2, y, 16, sel ? GOLD : CREAM, 'center');
+        }
+      });
+      // what the "special" keys do differs per character
+      T('Tir special : Laura = lob de gateau, Marcos = power chord, Oriane = pot de beurre de cacahuete.', C.width / 2, 446, 12, DIM, 'center');
+      T('Allie : chat de Laura, etudiants de Marcos (Oriane n en a pas).', C.width / 2, 463, 12, DIM, 'center');
+      if (capturing) T('Appuie sur la nouvelle touche...   (ECHAP annule, RETOUR efface la touche 2)', C.width / 2, 492, 14, GOLD, 'center', 0.6 + 0.4 * Math.abs(Math.sin(t * 4)));
+      else if (msgT > 0 && msg) T(msg, C.width / 2, 492, 14, msgCol, 'center');
+      else T('Fleches : choisir     ENTREE : changer     ECHAP : retour', C.width / 2, 492, 14, DIM, 'center');
+    });
   });
 
   // --- SELECTION DU PERSONNAGE (2 cartes par page, catalogue extensible) ---
@@ -4951,8 +5373,8 @@
     // cadre facon vieille carte (dessine en outline-only, au-dessus de tout)
     add([pos(0, 0), z(7), {
       draw() {
-        drawRect({ pos: vec2(7, 7), width: C.width - 14, height: C.height - 14, radius: 12, fill: false, outline: { width: 6, color: rgb(52, 32, 20) } });
-        drawRect({ pos: vec2(13, 13), width: C.width - 26, height: C.height - 26, radius: 8, fill: false, outline: { width: 2, color: rgb(255, 244, 219) }, opacity: 0.6 });
+        drawRect({ pos: vec2(7, 7), width: C.width - 14, height: C.height - 14, radius: 12, fill: false, outline: { join: 'miter', width: 6, color: rgb(52, 32, 20) } });
+        drawRect({ pos: vec2(13, 13), width: C.width - 26, height: C.height - 26, radius: 8, fill: false, outline: { join: 'miter', width: 2, color: rgb(255, 244, 219) }, opacity: 0.6 });
       },
     }]);
 
@@ -5291,6 +5713,8 @@
     bubble: (i, txt) => { const e = get('passant')[i || 0]; if (!e) return null; const ph = npcPhrases(e); return npcBubble(e, txt || (ph ? ph[0] : 'Coucou Laura !'), 6); },
     // debug : lache une bombe sur la colonne du joueur (teste chute/ombre/souffle)
     bomb: (delay) => { if (PLAYER && PLAYER.exists()) dropBomb(PLAYER.pos.x, PLAYER.pos.y, delay || 0.9, 'shot_bomb'); },
+    // debug : equipe le velo / les rollers (teste le canon a piments d'Oriane)
+    equip: (name) => equip(name || 'velo'),
   };
 
   // --- GO ! ------------------------------------------------------------
@@ -5320,6 +5744,8 @@
       tsec: 137, pct: 100, savedPct: 40, par: { or: 115, argent: 175, bronze: 255 }, feli: true });
   } else if (location.hash === '#characters') {
     go('characters');
+  } else if (location.hash === '#controls') {
+    go('controls', { back: 'title' });
   } else {
     go('title');
   }

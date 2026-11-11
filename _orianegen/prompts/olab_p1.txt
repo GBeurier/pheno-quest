@@ -1,0 +1,17 @@
+Use your built-in image_gen tool (the "imagegen" skill) to GENERATE raster pixel art. Do NOT use the CLI fallback (no OPENAI_API_KEY). Do NOT draw procedurally (no PIL/SVG/canvas). The artwork MUST come from your AI image generator. Generate exactly ONE image (ONE image_gen call).
+
+STYLE (CRITICAL, match this game's other indoor backgrounds: rich, detailed, busy 16-bit interiors): retro 16-bit pixel-art, classic LucasArts "Monkey Island" / SCUMM adventure-game vibe, cozy and CUTE, crisp visible square pixels, BOLD dark outlines, limited palette, flat cel shading, chunky readable shapes, a touch of humour. NO smooth gradients, NO 3D render, NO painterly look, NO photographic realism.
+
+PLACE: the real CIRAD research-unit CORRIDOR shown in the attached PHOTOS (redraw it as pixel art, keep its real look): long hallway with a white suspended ceiling and long fluorescent strip lights on a metal rail, pale cream walls, ORANGE / salmon door frames and orange doors, small square beige-white mosaic FLOOR TILES, colourful scientific POSTERS on the walls.
+
+SHARED VERTICAL LAYOUT (IDENTICAL in every panel so they line up; a corridor wall seen FLAT FROM THE SIDE like a SCUMM room, floor-to-CEILING, about 3:2 landscape): TOP ~16% = white drop CEILING with fluorescent strip lights (keep the very top corners calm, a HUD is drawn over them); MIDDLE ~58% = the wall with the furniture described below; BOTTOM ~26% = the small square beige mosaic tile floor meeting a thin grey skirting.
+
+SEAMLESS JOIN (CRITICAL): panels butt together left-to-right. At each panel's far-left ~8% and far-right ~8% show ONLY PLAIN cream wall + the same ceiling and floor (nothing crossing a side edge). NO people, NO legible text (posters show only colourful charts, plant images and blocks of unreadable squiggles).
+
+THIS PANEL (left part of the corridor): the POSTER corridor of the attached photos: three big colourful scientific POSTERS pinned on the cream wall (one black poster with a glowing rainbow heat-map circle, one white poster with orange tables and charts, one dark poster with a pixel plant anatomy diagram), an orange door frame with an open orange door, a plain fire extinguisher, a light switch.
+
+After image_gen returns, copy ONLY the PNG created by THIS Codex session to:
+  D:/workspace/pheno-quest/_orianegen/raw/olab_p1.png
+CRITICAL: do NOT select "the newest PNG" globally from ~/.codex/generated_images. Use only the generated_images subdirectory for YOUR OWN Codex session id, or otherwise verify the file was produced by your own image_gen call. If you cannot identify it unambiguously, print FAIL_UNSAFE_COPY instead.
+Do NOT run chroma-key removal, do NOT delete files. Finally print exactly:
+  RAW: D:/workspace/pheno-quest/_orianegen/raw/olab_p1.png (<W>x<H>)

@@ -1,0 +1,15 @@
+Use your built-in image_gen tool (the "imagegen" skill) to GENERATE raster pixel art. Do NOT use the CLI fallback (no OPENAI_API_KEY). Do NOT draw procedurally (no PIL/SVG/canvas). The artwork MUST come from your AI image generator. Generate exactly ONE image (ONE image_gen call).
+
+STYLE: retro 16-bit SNES pixel art matching a cute cartoon run-and-gun platformer. Crisp visible square pixels, bold dark outlines, limited vibrant palette, flat cel shading, chunky readable shapes. NO smooth gradients, NO anti-aliasing, NO 3D render, NO painterly/airbrushed look, NO photo-realism.
+
+FORMAT (CRITICAL): a WIDE horizontal PANORAMA STRIP for a side-scrolling PARALLAX background layer, seen straight from the SIDE (side elevation, like a stage backdrop). The scenery sits in the LOWER part of the image and runs across the FULL WIDTH, continuing straight off BOTH the left and the right edges (it will be tiled horizontally: no frame, no vignette, nothing that ends at the sides, keep the left and right edges similar in height and color). Everything ABOVE the scenery must be ONE perfectly FLAT solid #ff00ff magenta (chroma-key). NEVER use magenta or pink in the scenery itself. NO people, NO watermark.
+
+SETTING: a VIRTUAL CROP-SIMULATION WORLD inside a computer: everything is made of glowing PIXELS and VOXELS, a deep navy / midnight-blue cyber palette with bright CYAN, LIME-GREEN and AMBER neon accents, thin glowing grid lines, floating code fragments. It must evoke CROP MODELLING (a soil-crop simulator): pixelated WHEAT and MAIZE plants drawn as stepped green voxel stacks, growth CURVES and line charts, soil layers shown as a striped cross-section, little water-drop and nitrogen icons, weather icons.
+
+SCENERY: the NEAR layer: a LOW strip of VIRTUAL EXPERIMENTAL FIELD PLOTS: neat rows of pixelated voxel WHEAT, MAIZE and LEGUME plants (an intercrop: two crops alternating), some drawn as glowing cyan WIREFRAME plants still being computed, little floating labels as unreadable squiggles, a soil cross-section with stripes below them, small glowing weather-station poles, a few corrupted glitchy pixel blocks. Keep it LOW and wide: everything fits in the bottom ~35% of the image, the rest above is flat magenta. The bottom edge is solid dark navy soil grid.
+
+After image_gen returns, copy ONLY the PNG created by THIS Codex session to:
+  D:/workspace/pheno-quest/_orianegen/raw/bg_simu_mid.png
+CRITICAL: do NOT select "the newest PNG" globally from ~/.codex/generated_images. Use only the generated_images subdirectory for YOUR OWN Codex session id, or otherwise verify the file was produced by your own image_gen call. If you cannot identify it unambiguously, print FAIL_UNSAFE_COPY instead.
+Do NOT run chroma-key removal, do NOT delete files. Finally print exactly:
+  RAW: D:/workspace/pheno-quest/_orianegen/raw/bg_simu_mid.png (<W>x<H>)

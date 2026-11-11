@@ -1,0 +1,17 @@
+Use your built-in image_gen tool (the "imagegen" skill) to GENERATE raster pixel art. Do NOT use the CLI fallback (no OPENAI_API_KEY). Do NOT draw procedurally (no PIL/SVG/canvas). The artwork MUST come from your AI image generator. Generate exactly ONE image (ONE image_gen call).
+
+STYLE: retro 16-bit SNES pixel art matching a cute cartoon run-and-gun platformer. Crisp visible square pixels, bold dark outlines, limited vibrant palette, flat cel shading, chunky readable shapes. NO smooth gradients, NO anti-aliasing, NO 3D render, NO painterly/airbrushed look, NO photo-realism.
+
+SETTING: a VIRTUAL CROP-SIMULATION WORLD inside a computer: everything is made of glowing PIXELS and VOXELS, a deep navy / midnight-blue cyber palette with bright CYAN, LIME-GREEN and AMBER neon accents, thin glowing grid lines, floating code fragments. It must evoke CROP MODELLING (a soil-crop simulator): pixelated WHEAT and MAIZE plants drawn as stepped green voxel stacks, growth CURVES and line charts, soil layers shown as a striped cross-section, little water-drop and nitrogen icons, weather icons.
+
+BACKGROUND: fill the ENTIRE image (including around the object) with ONE perfectly FLAT solid #ff00ff magenta. NO shadow, NO contact shadow, NO floor line, NO gradient, NO grid lines, NO frame numbers, NO text, NO labels, NO watermark. NEVER use magenta or pink anywhere on the subject.
+
+The ATTACHED image is the GEOMETRY reference: a game platform tile (a tilted solar panel seen in side/3-4 perspective: a flat parallelogram leaning back toward the upper-left, front edge horizontal at the bottom).
+
+SUBJECT: redraw that EXACT SAME platform shape, angle, proportions and framing, but as a floating SOFTWARE WINDOW panel of the simulation world: a dark navy glass slab with a glowing CYAN neon border, a tiny title bar with three little dots, rows of tiny lime-green and amber CODE lines (unreadable squiggles) and a mini green growth curve on its face. Along the bottom FRONT edge a thick bright cyan glowing ledge (the edge the hero stands on). ONE single object, centered, filling about 80% of the width.
+
+After image_gen returns, copy ONLY the PNG created by THIS Codex session to:
+  D:/workspace/pheno-quest/_orianegen/raw/tile_simu.png
+CRITICAL: do NOT select "the newest PNG" globally from ~/.codex/generated_images. Use only the generated_images subdirectory for YOUR OWN Codex session id, or otherwise verify the file was produced by your own image_gen call. If you cannot identify it unambiguously, print FAIL_UNSAFE_COPY instead.
+Do NOT run chroma-key removal, do NOT delete files. Finally print exactly:
+  RAW: D:/workspace/pheno-quest/_orianegen/raw/tile_simu.png (<W>x<H>)

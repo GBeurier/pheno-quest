@@ -82,6 +82,11 @@ CAMPAGNE MARCOS (Java) — cf. docs/superpowers/specs/2026-11-02-marcos-campaign
   Z         scooter (VEHICULE rapide, traverse les panneaux)
   g         pickup DURIAN : aura puante 7 s (degats autour + dissout les tirs)
 
+CAMPAGNE ORIANE (modelisation des cultures) — cf. docs/superpowers/specs/2026-11-10-oriane-campaign-design.md
+  v         logo R (TIR : crache des erreurs rouges ; SticsRPacks)
+  j         tasse Java (SOL : fonce vers Oriane ; JavaStics)
+  h         glitch (VOLANT : bug informatique en pixels)
+
 FIGURANT
   N         passant (corps "biome" + tete South Park au hasard ; fait les
             cent pas. Habits/tetes via theme.passant, cf. js/level.js.)

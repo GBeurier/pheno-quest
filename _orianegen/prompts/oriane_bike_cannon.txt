@@ -1,0 +1,15 @@
+Use your built-in image_gen tool (the "imagegen" skill) to GENERATE raster pixel art. Do NOT use the CLI fallback (no OPENAI_API_KEY). Do NOT draw procedurally (no PIL/SVG/canvas). The artwork MUST come from your AI image generator. Generate exactly ONE image (ONE image_gen call).
+
+STYLE: retro 16-bit SNES pixel art matching a cute cartoon run-and-gun platformer. Crisp visible square pixels, bold dark outlines, limited vibrant palette, flat cel shading, chunky readable shapes. NO smooth gradients, NO anti-aliasing, NO 3D render, NO painterly/airbrushed look, NO photo-realism.
+
+The ATTACHED image is a 4-frame sprite sheet of ORIANE riding her bicycle (black city bike, billiard 8-ball helmet, long light-brown hair, black hoodie, blue jeans, white sneakers, brown satchel). REPRODUCE IT EXACTLY: same 4 frames in the same single row, same rider, same bike, same poses, same scale, same pixel style, same spacing and baseline.
+
+ADD ONE THING, identical in all 4 frames: a small cartoon CHILI CANNON bolted on the front of the bike, on a little metal bracket on the handlebar stem just in front of her hands. The cannon is a short stubby barrel shaped like a big glossy RED CHILI PEPPER lying horizontally, with its green stem cap and a little brass ring at the BACK (near her hands) and a dark round open MUZZLE pointing straight FORWARD to the RIGHT, perfectly horizontal, at the height of the handlebars. A couple of tiny red chili peppers peek out of a small ammo box clipped under it. Keep the cannon COMPACT: its muzzle sticks out only slightly beyond the front edge of the front wheel. It must look like part of the bike (same outline, same palette, same light), clearly readable at small size.
+
+BACKGROUND: fill the ENTIRE image (including every gap) with ONE perfectly FLAT solid #ff00ff magenta. NO shadow, NO contact shadow, NO floor line, NO gradient, NO grid lines, NO frame numbers, NO text, NO labels, NO watermark. NEVER use magenta or pink anywhere on the subject.
+
+After image_gen returns, copy ONLY the PNG created by THIS Codex session to:
+  D:/workspace/pheno-quest/_orianegen/raw/oriane_bike_cannon.png
+CRITICAL: do NOT select "the newest PNG" globally from ~/.codex/generated_images. Use only the generated_images subdirectory for YOUR OWN Codex session id, or otherwise verify the file was produced by your own image_gen call. If you cannot identify it unambiguously, print FAIL_UNSAFE_COPY instead.
+Do NOT run chroma-key removal, do NOT delete files. Finally print exactly:
+  RAW: D:/workspace/pheno-quest/_orianegen/raw/oriane_bike_cannon.png (<W>x<H>)

@@ -34,6 +34,12 @@ PARAMS = {
     'tikus':        dict(targeth=240, maxw=236, fit=True),
     'pakdurian':    dict(targeth=250, maxw=238, fit=True),
     'garuda':       dict(targeth=254, maxw=240, fit=True),
+    # Oriane campaign. even=True: the strip is a regular grid whose props (thrown
+    #  chili / jar) sit in the gaps -> island detection merges them; cut equal cells.
+    #  scale = ONE fixed factor for both sheets (move/atk), so the boss keeps the
+    #  same size when it swaps sheets (= the smaller of the two auto factors).
+    'stics':        dict(targeth=250, maxw=238, fit=True, scale=0.394),
+    'woriane':      dict(targeth=252, maxw=236, fit=True, even=True, scale=0.627),
 }
 
 def key_magenta(im, tol=72):
@@ -132,7 +138,8 @@ def run(inp, boss, kind, N):
     img = key_magenta(Image.open(inp))
     W, H = img.size
     mask = np.array(img)[..., 3] > 0
-    x_runs = projection_runs(mask, N)
+    x_runs = ([(round(i * W / N), round((i + 1) * W / N)) for i in range(N)]
+              if p.get('even') else projection_runs(mask, N))
     pad = max(2, W // (N * 120))
     cells = []
     for x0, x1 in x_runs:
@@ -148,6 +155,8 @@ def run(inp, boss, kind, N):
     s = min(p['targeth']/med, (CH-4)/maxh)
     if p.get('fit'):
         s = min(s, p['maxw'] / max(c.width for c in cells))
+    if p.get('scale'):
+        s = p['scale']
     sheet = Image.new('RGBA', (CW*N, CH), (0, 0, 0, 0))
     for i, c in enumerate(cells):
         nw, nh = max(1, round(c.width*s)), max(1, round(c.height*s))

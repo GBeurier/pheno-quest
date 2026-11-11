@@ -43,8 +43,8 @@ LVL = os.path.join(ROOT, 'levels')
 
 SOLID = set('=-x')
 ITEMS = set('ocdpqwPkLYeig b'.replace(' ', ''))   # q/w = pilule/champignon PIEGES (cam inversee) : se ramassent comme 'd'/'p' ; g = durian (Marcos)
-GROUND_CHARS = set('TARJKWGCIHUSFDN@B^%rZ~')   # posés sur une surface (r rat, Z scooter, ~ boue : campagne Marcos)
-FLYERS = set('VMEy')                           # spawn 1.5-1.6 tuile au-dessus (y = oiseau qui pique)
+GROUND_CHARS = set('TARJKWGCIHUSFDN@B^%rZ~vj')   # posés sur une surface (r rat, Z scooter, ~ boue : campagne Marcos ; v R-logo, j Java cup : campagne Oriane)
+FLYERS = set('VMEyh')                          # spawn 1.5-1.6 tuile au-dessus (y = oiseau qui pique, h = glitch d'Oriane)
 FREE = set('u')                                # durian : au sol OU suspendu sous un panneau (aucun support requis)
 MARKERS = set('|')                             # marqueurs non-physiques (zone-ciel '|' : ni solide ni support requis)
 KNOWN = SOLID | ITEMS | GROUND_CHARS | FLYERS | MARKERS | FREE | set('@B*^% ')
@@ -54,6 +54,8 @@ META = {
     'marcos_rizieres': dict(W=182, R=13, g=11, gear=[], boss_range=470 / 48),
     'marcos_village':  dict(W=200, R=13, g=11, gear=[], boss_range=500 / 48),
     'marcos_parcelle': dict(W=200, R=13, g=11, gear=[], boss_range=500 / 48),
+    'oriane_simu':     dict(W=200, R=13, g=11, gear=[], boss_range=470 / 48),
+    'oriane_labo':     dict(W=200, R=13, g=11, gear=[], boss_range=480 / 48),
     'niveau1': dict(W=148, R=13, g=11, gear=[],          boss_range=500 / 48),
     'niveau2': dict(W=260, R=14, g=12, gear=['velo'],    boss_range=500 / 48),
     'niveau3': dict(W=280, R=14, g=12, gear=['rollers'], boss_range=470 / 48),

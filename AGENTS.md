@@ -2,9 +2,11 @@
 
 **Pheno-Quest** (`GBeurier/pheno-quest`, <https://gbeurier.github.io/pheno-quest/>) is the game of the PhenoMEn team's PhD students (UMR AGAP Institut, CIRAD/INRAE). It is a fork of Laura Quest (`GBeurier/laura-quest`, git remote `laura-quest`), which stays online unchanged for former players: never push Pheno-Quest changes there.
 
+These guidelines reuse `../laura-quest/AGENTS.md`, with additions for Marcos and the shared character/campaign system. Keep the existing architecture and `LQ_*` globals; extend character-specific behavior through the registries and kits, preserving Laura's gameplay.
+
 ## Project Structure & Module Organization
 
-This is a static browser game built on the vendored KAPLAY engine. `index.html` is the entry point and works under `file://`. Core game code lives in `js/`: `game.js` handles scenes and gameplay, `config.js` contains tuning and story text, `level.js` stores ASCII maps, `bosses.js` defines boss AI, `save.js` manages `localStorage` (slots + global prefs like audio mute), `music.js` is a dependency-free chiptune MIDI player (`window.LQ_MUSIC`), and `mobile.js` handles touch support. `engine/kaplay.js` is third-party engine code. Runtime media belongs in `assets/sprites/`, `assets/sounds/` and `assets/music/` (`.mid`, one track per level plus per-screen tracks mapped in `CONFIG.music`); sprite specs are in `SPRITES.md`. `js/assets_data.js` is generated from those assets. Tooling and asset pipelines live in `tools/` and `_...gen/` work directories. Audio shortcuts: `S` toggles sound effects, `M` toggles music (persisted via `LQ_SAVE` prefs).
+This is a static browser game built on the vendored KAPLAY engine. `index.html` is the entry point and works under `file://`. Core game code lives in `js/`: `game.js` handles scenes and gameplay, `config.js` contains tuning and story text, `level.js` stores ASCII maps, `bosses.js` defines boss AI, `save.js` manages `localStorage` (slots + global prefs like audio mute), `controls.js` applies the player's key bindings (`window.LQ_CONTROLS`, pref `controls`, screen `controls` opened with `T` on the title or `#controls`; HUD keycaps are derived from it), `music.js` is a dependency-free chiptune MIDI player (`window.LQ_MUSIC`), and `mobile.js` handles touch support. `engine/kaplay.js` is third-party engine code. Runtime media belongs in `assets/sprites/`, `assets/sounds/` and `assets/music/` (`.mid`, one track per level plus per-screen tracks mapped in `CONFIG.music`); sprite specs are in `SPRITES.md`. `js/assets_data.js` is generated from those assets. Tooling and asset pipelines live in `tools/` and `_...gen/` work directories. Audio shortcuts: `S` toggles sound effects, `M` toggles music (persisted via `LQ_SAVE` prefs).
 
 ## Build, Test, and Development Commands
 
@@ -19,9 +21,9 @@ Playable characters live in `js/characters.js` (`window.LQ_CHARACTERS`); adventu
 - `python3 -m http.server 8000`: optional local static server, useful when browser `localStorage` behavior under `file://` gets in the way.
 - Open `index.html#gameauto`: runs the autopilot/dev smoke path.
 
-Use `#game/marcos`, `#gameauto/marcos`, `#map/marcos`, or `#winscreen/marcos` for Marcos previews. Dev previews use disposable saves and do not overwrite player slots. `#characters` opens character selection.
+Use `#game/marcos`, `#gameauto/marcos`, `#map/marcos`, or `#winscreen/marcos` for Marcos previews (same with `oriane`, e.g. `#game/oriane_simu/oriane`). Oriane (campaign `oriane_these`, kit `chili`, bosses `stics` / `woriane`): `docs/superpowers/specs/2026-11-10-oriane-campaign-design.md`. Perf rules (lazy `bg_*`/`boss_*` pictures, batched static decor via `addDeco`, `join: 'miter'` on HUD outlines): see CLAUDE.md, *Performance architecture*. Dev previews use disposable saves and do not overwrite player slots. `#characters` opens character selection.
 
-There is no package manager manifest or formal build step beyond asset embedding. GitHub Pages runs `python3 gen_assets_data.py` before publishing.
+There is no package manager manifest or formal build step beyond map and asset embedding. GitHub Pages runs `python3 gen_levels_data.py` and `python3 gen_assets_data.py` before publishing.
 
 ## Coding Style & Naming Conventions
 
@@ -30,6 +32,8 @@ Use plain JavaScript in the existing global style: `window.CONFIG`, `window.LEVE
 ## Testing Guidelines
 
 No automated test framework is configured. For gameplay changes, smoke-test in a browser from title screen through level entry, combat, save slots, and return to overworld. Use `index.html#gameauto` for a quick automated path, then manually verify any changed level, boss, control, or asset. After asset changes, run `python3 gen_assets_data.py` and reload.
+
+For shared gameplay or save changes, run `node tools/check_campaigns.js` and check both Laura and Marcos. For Marcos-specific changes, use the Marcos preview routes above and verify that his guitar kit and student allies remain isolated from Laura's abilities. After map changes, run `python3 gen_levels_data.py` and `python3 tools/check_levels.py`.
 
 ## Commit & Pull Request Guidelines
 

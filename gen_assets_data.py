@@ -11,6 +11,7 @@ quand il est plus petit (rare) ou si Pillow manque. Les sources restent des
 PNG dans assets/sprites/ : rien ne change pour les pipelines d'art.
 """
 import base64
+import hashlib
 import io
 import json
 import os
@@ -35,18 +36,61 @@ def datauri(data, mime):
     return "data:%s;base64,%s" % (mime, base64.b64encode(data).decode())
 
 
+# AI-generated art is not palette pixel-art: a high-quality LOSSY WebP is visually
+#  identical in game and 2-3x smaller than the lossless one (perf pass "le jeu est
+#  gros"). Painted pictures (panoramas / screens bg_*, boss sheets boss_*) at q88,
+#  character / enemy / NPC body sheets at q90 (checked side by side, x4 zoom).
+#  Tiles, icons, heads, UI stay pixel-exact (lossless WebP).
+LOSSY = {"bg_": 88, "boss_": 88, "enemy_": 90, "hero_": 90, "marcos_": 90, "oriane_": 90, "body_": 90}
+
+
+def lossy_q(name):
+    return next((q for pre, q in LOSSY.items() if name.startswith(pre)), None)
+
+
+# Encoding cache (local only, gitignored): WebP method 6 on 300+ sprites takes
+#  minutes; the result only depends on the source bytes + the encoding settings.
+CACHE = os.path.join(ROOT, ".cache", "assets")
+CACHE_TAG = "v1-q88"   # + per-file lossy quality when it is not 88 (cf. best_image)
+SEP = bytes([10])    # cache file = mime + newline + bytes
+
+
 def best_image(path, mime):
-    """Bytes + mime de la version la plus compacte (WebP lossless vs original)."""
     with open(path, "rb") as f:
         raw = f.read()
-    if Image is None or mime != "image/png":
-        return raw, mime          # JPG : deja compact ; pas de Pillow : tel quel
-    buf = io.BytesIO()
-    Image.open(path).save(buf, "WEBP", lossless=True, quality=100, method=6)
-    webp = buf.getvalue()
-    if len(webp) < len(raw):
-        return webp, "image/webp"
-    return raw, mime
+    if Image is None:
+        return raw, mime          # no Pillow: as is
+    q = lossy_q(os.path.basename(path))
+    tag = CACHE_TAG + ("" if q in (None, 88) else "-l%d" % q)
+    key = hashlib.sha1(raw + tag.encode() + os.path.basename(path).encode()).hexdigest()
+    cpath = os.path.join(CACHE, key)
+    if os.path.exists(cpath):
+        with open(cpath, "rb") as f:
+            blob = f.read()
+        m, _, data = blob.partition(SEP)
+        return data, m.decode()
+    data, m = encode_image(path, raw, mime)
+    os.makedirs(CACHE, exist_ok=True)
+    with open(cpath, "wb") as f:
+        f.write(m.encode() + SEP + data)
+    return data, m
+
+
+def encode_image(path, raw, mime):
+    """Bytes + mime of the most compact version (original / WebP lossless / lossy for painted art)."""
+    name = os.path.basename(path)
+    cands = [(raw, mime)]
+    im = Image.open(path)
+    if mime == "image/png":
+        buf = io.BytesIO()
+        im.save(buf, "WEBP", lossless=True, quality=100, method=6)
+        cands.append((buf.getvalue(), "image/webp"))
+    q = lossy_q(name)
+    if q:
+        buf = io.BytesIO()
+        im.save(buf, "WEBP", quality=q, method=6, alpha_quality=100)
+        cands.append((buf.getvalue(), "image/webp"))
+    return min(cands, key=lambda c: len(c[0]))
 
 
 # PNG = sprites/transparence ; JPG = fonds plein-cadre sans alpha (bien plus leger).
@@ -96,7 +140,7 @@ with open(OUT, "w") as f:
     f.write(";\n")
 
 size = os.path.getsize(OUT)
-print("js/assets_data.js : %d sprites (%.1f -> %.1f Mo, webp lossless), %d sons, "
+print("js/assets_data.js : %d sprites (%.1f -> %.1f Mo, webp), %d sons, "
       "%d musiques (%.1f Ko), %d fonts (%.1f Ko), %.0f Ko"
       % (len(sprites), png_total / 1e6, out_total / 1e6, len(sounds),
          len(music), mus_total / 1024, len(fonts), fnt_total / 1024, size / 1024))

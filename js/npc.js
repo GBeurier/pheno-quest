@@ -147,5 +147,13 @@ window.NPC = {
     phrases: ["The army of students is ready to help you!"] },
   "head_npc_h_28":  { sexe: "h", src: "afif.jpeg",                 taille: "M",  level: "marcos", prenom: "Afif", nom: "",
     phrases: ["Marcos, il faut goûter les Durian !"] },
+  // --- NPCs dedicated to the ORIANE campaign (level 'oriane' = priority in HER 3
+  //  levels, cf. LEVELS[x].npcLevel; the rest of the crowd comes from Laura's pool) ---
+  "head_npc_h_29":  { sexe: "h", src: "marc_jaeger.png",           taille: "G",  level: "oriane", prenom: "Marc", nom: "Jaeger",
+    phrases: ["Tu as bien complété ton ADUM ?"] },
+  "head_npc_h_30":  { sexe: "h", src: "thomas_arsouze.png",        taille: "M",  level: "oriane", prenom: "Thomas", nom: "Arsouze",
+    phrases: ["N'oublie pas de bien distribuer tes calculs !"] },
+  "head_npc_h_31":  { sexe: "h", src: "remy_vezy.png",             taille: "M",  level: "oriane", prenom: "Rémy", nom: "Vézy",
+    phrases: ["T'as dilué l'azote dans la courbe de STICS ?"] },
 
 };

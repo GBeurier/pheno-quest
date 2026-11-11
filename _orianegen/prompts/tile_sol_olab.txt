@@ -1,0 +1,11 @@
+Use your built-in image_gen tool (the "imagegen" skill) to GENERATE raster pixel art. Do NOT use the CLI fallback (no OPENAI_API_KEY). Do NOT draw procedurally (no PIL/SVG/canvas). The artwork MUST come from your AI image generator. Generate exactly ONE image (ONE image_gen call).
+
+STYLE: retro 16-bit SNES pixel art matching a cute cartoon run-and-gun platformer. Crisp visible square pixels, bold dark outlines, limited vibrant palette, flat cel shading, chunky readable shapes. NO smooth gradients, NO anti-aliasing, NO 3D render, NO painterly/airbrushed look, NO photo-realism.
+
+SUBJECT: the seamless FLOOR TILE of that same corridor (the second attached image is the matching background: use EXACTLY its floor colours): small square beige / off-white MOSAIC floor tiles with grey grout. TOP ~22% = the walkable SURFACE (mosaic seen in a shallow top-down tilt, CLEAN STRAIGHT HORIZONTAL TOP EDGE). BOTTOM ~78% = the solid FRONT FACE (a grey skirting over a darker beige tiled front, bold dark outline along the VERY BOTTOM). TILEABLE left-right, uniform flat lighting, no unique feature, no text. Roughly SQUARE, full-bleed, NO magenta, NO transparency, NO border.
+
+After image_gen returns, copy ONLY the PNG created by THIS Codex session to:
+  D:/workspace/pheno-quest/_orianegen/raw/tile_sol_olab.png
+CRITICAL: do NOT select "the newest PNG" globally from ~/.codex/generated_images. Use only the generated_images subdirectory for YOUR OWN Codex session id, or otherwise verify the file was produced by your own image_gen call. If you cannot identify it unambiguously, print FAIL_UNSAFE_COPY instead.
+Do NOT run chroma-key removal, do NOT delete files. Finally print exactly:
+  RAW: D:/workspace/pheno-quest/_orianegen/raw/tile_sol_olab.png (<W>x<H>)

@@ -1258,5 +1258,225 @@ window.BOSS_AI = (() => {
     juice(b);
   };
 
+  /* =====================================================================
+   *  ORIANE campaign — 2 new bosses (level 1 reuses FRANCOIS the landlord).
+   *  cf. docs/superpowers/specs/2026-11-10-oriane-campaign-design.md
+   * ===================================================================== */
+
+  /* ---------------------------------------------------------------------
+   *  STICS, the crop simulation model Oriane keeps running and that keeps CRASHING ("plante") (oriane_simu) — AI 'stics'.
+   *  A heavy rack that never walks. Cycle:
+   *   compute (telegraph: LEDs flash, fans roar)
+   *   -> fire     : 3 duckable volleys of data packets (tripleShoot)
+   *                 [P2: + one "stack trace" wall with a hole]
+   *   -> spray    : nitrogen droplets rain on marked spots around Oriane
+   *   -> summon   : every `summonEvery` cycles, an R logo (SticsRPacks) or a
+   *                 Java cup (JavaStics) pops in front of her
+   *   -> overheat : glows red, shakes (short telegraph of the crash)
+   *   -> crash    : BLUE SCREEN, smoke = PUNISH WINDOW (guard 1, harmless)
+   *   -> reboot   : progress bar, then a new cycle.
+   * --------------------------------------------------------------------- */
+  AI.stics = function (b, p, api) {
+    const D = b.def;
+    if (b.ss === undefined) { b.ss = 'compute'; b.st = 0; b.cyc = 0; b.burst = 0; b.done = false; b.fx = 0; b.wallDone = false; }
+    if (b.p2Just) p2Tell(b, api);
+    b.st += dt();
+    const groundY = b._restY != null ? b._restY : b.pos.y;
+    faceOnly(b, p);
+    const go = (s) => { b.ss = s; b.st = 0; b.done = false; b.burst = 0; b.fx = 0; };
+
+    if (b.ss === 'compute') {
+      b.animWant = 'charge';
+      b._sq = Math.sin(b.st * 46) * 0.03;
+      b.fx += dt();
+      if (b.fx > 0.16) { b.fx = 0; api.poof(b.pos.x + rand(-24, 24), b.pos.y - TS * rand(2.2, 3)); }
+      if (b.st > (b.p2 ? (D.p2ComputeTime || 0.6) : (D.computeTime || 0.9))) go('fire');
+    } else if (b.ss === 'fire') {
+      b.animWant = 'fire';
+      const gap = b.p2 ? (D.p2BurstGap || 0.55) : (D.burstGap || 0.75);
+      const need = Math.min(3, Math.floor(b.st / gap) + 1);
+      while (b.burst < need) { tripleShoot(b, p, api, D.shotSpeed || 250); b.burst++; b._sq = 0.08; }
+      if (b.p2 && !b.wallDone && b.st > gap * 2.2) {
+        b.wallDone = true;
+        wallWithHole(b, p, api, { gapY: (rand(0, 1) < 0.4) ? groundY - TS * rand(3, 4.5) : null });
+      }
+      if (b.st > gap * 3 + 0.3) go('spray');
+    } else if (b.ss === 'spray') {
+      // NITROGEN rain: the chimney sprays droplets that land on marked spots
+      b.animWant = 'spray';
+      if (!b.done && b.st > 0.3) {
+        b.done = true;
+        b._sq = 0.16;
+        if (inArena(b, p, api) && api.dropBomb) {
+          const n = b.p2 ? (D.p2RainN || 5) : (D.rainN || 3);
+          for (let i = 0; i < n; i++) {
+            const x = arenaX(b, p.pos.x + (i - (n - 1) / 2) * TS * 2.1, TS);
+            api.dropBomb(x, p.pos.y, 0.85 + i * 0.16, D.rain || D.shot);
+          }
+        }
+      }
+      if (b.st > (D.sprayTime || 1.5)) {
+        b.cyc++;
+        go((b.cyc % (D.summonEvery || 2) === 0) ? 'summon' : 'overheat');
+      }
+    } else if (b.ss === 'summon') {
+      b.animWant = 'charge';
+      if (!b.done && b.st > 0.35) {
+        b.done = true;
+        const kinds = D.minions || ['rlogo', 'javacup'];
+        const n = b.p2 ? 2 : 1;
+        for (let i = 0; i < n; i++) spawnEnFace(b, p, api, kinds[Math.floor(rand(0, kinds.length))]);
+      }
+      if (b.st > 0.9) go('overheat');
+    } else if (b.ss === 'overheat') {
+      b.animWant = 'overheat';
+      b.tilt = Math.sin(b.st * 60) * 2.5;
+      b.fx += dt();
+      if (b.fx > 0.1) { b.fx = 0; api.poof(b.pos.x + rand(-30, 30), b.pos.y - TS * rand(0.5, 2.6)); }
+      if (b.st > (D.overheatTime || 0.7)) { go('crash'); if (api.sfx) api.sfx('hit'); }
+    } else if (b.ss === 'crash') {
+      // BLUE SCREEN: the server is frozen -> PUNISH WINDOW
+      b.animWant = 'crash';
+      b.guard = 1;
+      b.tilt = -4;
+      b.fx += dt();
+      if (b.fx > 0.28) { b.fx = 0; api.poof(b.pos.x + rand(-20, 20), b.pos.y - TS * 3); }
+      if (b.st > (b.p2 ? (D.p2CrashTime || 1.9) : (D.crashTime || 2.6))) go('reboot');
+    } else {
+      b.animWant = 'reboot';
+      if (b.st > (D.rebootTime || 0.6)) { go('compute'); b.wallDone = false; }
+    }
+    b.harmless = (b.ss === 'crash');
+    p2Pose(b);
+    clampHome(b);
+    juice(b);
+  };
+
+  /* ---------------------------------------------------------------------
+   *  WORIANE, Oriane's dark twin (oriane_labo, FINAL boss) — AI 'woriane'.
+   *  She embodies Oriane's doubts. She paces nervously, then performs ONE
+   *  attack from a rotation and COLLAPSES (curled up, crying = PUNISH):
+   *   chili : throws a fan of cursed dark chilis (mirror of Oriane's SPACE);
+   *   jar   : bowls a dark peanut-butter jar along the floor (jump over it);
+   *   doubt : summons storm clouds of doubt that chase Oriane, lightning
+   *           strikes on marked spots;
+   *   dash  : (P2) panic dash across the arena;
+   *   panic : (P2) spiral burst of dark chilis in every direction.
+   * --------------------------------------------------------------------- */
+  const WORIANE_P1 = ['chili', 'jar', 'dash', 'doubt'];
+  const WORIANE_P2 = ['dash', 'chili', 'panic', 'jar', 'doubt'];
+  AI.woriane = function (b, p, api) {
+    const D = b.def;
+    if (b.ws === undefined) { b.ws = 'pace'; b.st = 0; b.ai = 0; b.done = 0; b.fx = 0; b.dir = -1; b.combo = 0; b.potshot = 0; }
+    if (b.p2Just) p2Tell(b, api);
+    b.st += dt();
+    const groundY = b._restY != null ? b._restY : b.pos.y;
+    const go = (s) => { b.ws = s; b.st = 0; b.done = 0; b.fx = 0; };
+    const nextAttack = () => {
+      const rot = b.p2 ? WORIANE_P2 : WORIANE_P1;
+      go(rot[b.ai % rot.length]); b.ai++;
+    };
+    // COMBOS: she chains comboN attacks (P2: p2ComboN) before collapsing.
+    const finish = () => {
+      b.combo++;
+      if (b.combo < (b.p2 ? (D.p2ComboN || 3) : (D.comboN || 2))) nextAttack();
+      else { b.combo = 0; go('collapse'); }
+    };
+
+    if (b.ws === 'pace') {
+      // nervous pacing: approaches but keeps her distance, small jitter
+      faceOnly(b, p);
+      b.animWant = 'idle';
+      if (Math.abs(p.pos.x - b.pos.x) > TS * (D.keepGap || 4)) moveClamp(b, p, D.speed || 110);
+      b.tilt = Math.sin(b.st * 13) * 2;
+      // she never just waits: a quick aimed chili every potshotEvery s while pacing
+      b.potshot += dt();
+      if (b.potshot > (b.p2 ? (D.p2PotshotEvery || 0.6) : (D.potshotEvery || 0.9))) {
+        b.potshot = 0; b.animWant = 'throw';
+        shoot(b, p, api, D.shotSpeed || 270, rand(-0.06, 0.06));
+      }
+      if (b.st > (b.p2 ? (D.p2PaceTime || 0.9) : (D.paceTime || 1.5))) nextAttack();
+    } else if (b.ws === 'chili') {
+      faceOnly(b, p);
+      b.animWant = b.st < 0.4 ? 'windup' : 'throw';
+      if (!b.done && b.st > 0.4) {
+        b.done = 1; b._sq = 0.12;
+        const n = b.p2 ? (D.p2ChiliN || 5) : (D.chiliN || 3);
+        for (let i = 0; i < n; i++) shoot(b, p, api, D.shotSpeed || 270, (i - (n - 1) / 2) * 0.2);
+      }
+      if (b.st > 0.95) finish();
+    } else if (b.ws === 'jar') {
+      // dark jar(s) rolling on the floor toward Oriane: jump over them
+      faceOnly(b, p);
+      b.animWant = 'bowl';
+      const n = b.p2 ? 2 : 1;
+      if (b.done < n && b.st > 0.35 + b.done * 0.55) {
+        b.done++; b._sq = -0.12;
+        const dir = Math.sign(p.pos.x - b.pos.x) || -1, y = groundY - TS * 0.33;
+        api.bullet(b.pos.x + dir * TS * 0.6, y, { pos: vec2(b.pos.x + dir * 900, y) }, D.jarSpeed || 300, 'boss', D.jar || D.shot);
+      }
+      if (b.st > 0.35 + n * 0.55 + 0.3) finish();
+    } else if (b.ws === 'doubt') {
+      faceOnly(b, p);
+      b.animWant = 'doubt';
+      b.fx += dt();
+      if (b.fx > 0.12) { b.fx = 0; api.poof(b.pos.x + rand(-26, 26), b.pos.y - TS * rand(2.4, 3.2)); }
+      if (!b.done && b.st > 0.5) {
+        b.done = 1;
+        const n = b.p2 ? (D.p2CloudN || 3) : (D.cloudN || 2);
+        for (let i = 0; i < n; i++) {
+          const x = arenaX(b, b.pos.x + (i - (n - 1) / 2) * TS * 1.6, TS);
+          api.poof(x, b.pos.y - TS * 3);
+          api.add(D.cloud || 'doute', x, b.pos.y - TS * 3);
+        }
+        if (inArena(b, p, api) && api.dropBomb) {     // lightning from the doubt clouds
+          const k = b.p2 ? 3 : 2;
+          for (let i = 0; i < k; i++) api.dropBomb(arenaX(b, p.pos.x + (i - (k - 1) / 2) * TS * 2.4, TS), p.pos.y, 1.0 + i * 0.25, D.bolt || D.shot);
+        }
+      }
+      if (b.st > 1.3) finish();
+    } else if (b.ws === 'dash') {
+      // panic dash: telegraph (trembling) then crosses the arena
+      if (b.done === 0) {
+        faceOnly(b, p);
+        b.animWant = 'windup';
+        b.tilt = Math.sin(b.st * 50) * 4;
+        if (b.st > 0.5) { b.done = 1; b.dir = Math.sign(p.pos.x - b.pos.x) || -1; b.st = 0; }
+      } else {
+        b.flipX = b.dir > 0; b.facing = b.dir;
+        b.animWant = 'dash';
+        b.tilt = -b.dir * 8;
+        b.fx += dt();
+        if (b.fx > 0.05) { b.fx = 0; api.poof(b.pos.x - b.dir * TS * 0.6, b.pos.y - TS * 0.8); }
+        if (moveDirClamp(b, b.dir, D.dashSpeed || 520) || b.st > 1.6) finish();
+      }
+    } else if (b.ws === 'panic') {
+      // panic attack: a spiral of dark chilis in every direction
+      b.animWant = 'doubt';
+      b.tilt = Math.sin(b.st * 40) * 3;
+      const waves = D.panicWaves || 3, per = D.panicN || 8;
+      if (b.done < waves && b.st > 0.35 + b.done * 0.35) {
+        const off = b.done * 0.4;
+        for (let i = 0; i < per; i++) {
+          const a = off + (i / per) * Math.PI * 2;
+          shootDir(b, api, vec2(Math.cos(a), Math.sin(a)), (D.shotSpeed || 270) * 0.75);
+        }
+        b.done++;
+      }
+      if (b.st > 0.35 + waves * 0.35 + 0.2) finish();
+    } else {
+      // COLLAPSE: overwhelmed by doubt, curled up crying -> PUNISH WINDOW
+      b.animWant = 'collapse';
+      b.guard = 1;
+      b.fx += dt();
+      if (b.fx > 0.35) { b.fx = 0; api.poof(b.pos.x + rand(-14, 14), b.pos.y - TS * 1.4); }
+      if (b.st > (b.p2 ? (D.p2CollapseTime || 1.6) : (D.collapseTime || 2.2))) go('pace');
+    }
+    b.harmless = (b.ws === 'collapse');
+    p2Pose(b);
+    clampHome(b);
+    juice(b);
+  };
+
   return AI;
 })();

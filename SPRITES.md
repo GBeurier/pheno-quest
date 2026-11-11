@@ -67,6 +67,36 @@ Tout sprite absent retombe sur son `fallback` déclaré dans `CONFIG`.
 | `bg_marcos_chapter.jpg` / `bg_marcos_win.jpg` | 1672×941 | — | `bg_chapter.jpg` / `bg_win.jpg` | `_javagen` |
 | `marcos_guitar` | 896×224 | 4 | `marcos_*` (cellules 224, pieds y=220) | `_marcosskingen/build_guitar.py` |
 
+### Campagne Oriane — sprites dédiés
+
+Même contrat que Marcos (Codex `image_gen` séquentiel, tailles d'un analogue, `fallback`
+dans `CONFIG` / `characters.js` tant qu'un PNG manque).
+
+| Sprite | Taille (px) | sliceX | Analogue | Pipeline |
+| --- | --- | ---: | --- | --- |
+| `oriane_idle/run/jump/hurt/throw/duck/dash/dead` | cellules 224×224 | 2/4/2/1/2/3/1/2 | `marcos_*` | `_orianegen` (`oriane_sheet`, planche 4×4) |
+| `oriane_bike` (vélo + casque boule n°8) | 1024×224 | 4 | `hero_bike` | `_orianegen` (`-i oriane_sheet`) |
+| `head_npc_h_29` (Marc Jaeger) / `_30` (Thomas Arsouze) / `_31` (Rémy Vézy) | 336×112 | 3 | `head_npc_h_*` | `_headgen/run_batch.sh` (+ `_dead`) |
+| `enemy_rlogo` (droite) / `enemy_javacup` (gauche) / `enemy_glitch` (droite, vol) | 1056×192 | 6 | `enemy_imprimante` / `enemy_cafard` / `enemy_moustique` | `_monstgen` |
+| `boss_stics_move` / `_atk` | 1488×280 | 6 | `boss_rstudio_*` | `_bossgen/run_batch.sh stics` (`-i` logo STICS, `prompts/stics.refs`) |
+| `boss_woriane_move` / `_atk` | 1488×280 | 6 | `boss_cendrine_*` | `_bossgen/run_batch.sh woriane` (`-i` planche d'Oriane) |
+| `ammo_chili` / `ammo_chili_fire` | 312×52 / 336×56 | 6 | `ammo_graine(_fire)` | `_icongen/run_oriane.sh` |
+| `ammo_pbjar` / `shot_darkjar` (roulent, tournés par le moteur) | 80×80 | 1 | — | idem |
+| `shot_packet` `shot_nitrogen` `shot_darkchili` `shot_doubt` | 96×96 | 1 | `shot_error` | idem |
+| `tile_simu` / `simu_leg` | 144×88 / 96×48 | 1 | `tile_panel` / `panel_leg` | `_orianegen` |
+| `bg_simu_far` / `bg_simu_mid` | 960×480 / 2027×370 | — | `bg_mountains` / `bg_field` | `_orianegen` |
+| `tile_sol_simu` / `tile_sol_olab` | 224×296 | 1 | `tile_sol_labo` | `_orianegen` (→ `_levelgen/postprocess.py sol`) |
+| `bg_olab_a` / `bg_olab_b` (couloir du CIRAD, photos) | 2 moitiés ≤ 4096 | — | `bg_labo_a/b` | `_orianegen` (3 panneaux → panorama) |
+| `bg_oriane_map.jpg` / `bg_oriane_chapter.jpg` / `bg_oriane_win.jpg` | 1920×1056 / 1672×941 | — | `bg_marcos_*` | `_orianegen` |
+
+Relancer : `python _orianegen/make_prompts.py && bash _orianegen/run.sh [nom…] &&
+python _orianegen/build.py [nom…]`, puis `python gen_assets_data.py`.
+
+**Poids** : `gen_assets_data.py` encode les images **peintes** (`bg_*`, `boss_*`) en WebP
+avec perte (q88, invisible en jeu) et tout le reste en WebP sans perte ; cache local
+`.cache/assets/` (gitignoré). Au runtime, ces `bg_*`/`boss_*` ne sont décodés qu'à la
+première utilisation (cf. `LAZY_SRC` dans `js/game.js`).
+
 Orientation : ennemis `chase`/`patrol`/`dive` = source tournée vers la GAUCHE
 (le moteur mirroire) ; boss = GAUCHE ; tirs = pointe à DROITE (le moteur les
 tourne) ; `marcos_guitar` = profil DROIT (frames 0-1 grattage, 2-3 power chord).

@@ -1,0 +1,13 @@
+Use your built-in image_gen tool (the "imagegen" skill) to GENERATE raster pixel art. Do NOT use the CLI fallback (no OPENAI_API_KEY). Do NOT draw procedurally (no PIL/SVG/canvas). The artwork MUST come from your AI image generator. Generate exactly ONE image (ONE image_gen call).
+
+STYLE: retro 16-bit pixel art, cozy and CUTE storybook warmth (LucasArts / SNES adventure vibe), crisp visible square pixels, bold dark outlines, limited vibrant palette, flat cel shading, soft chunky readable shapes. NO smooth gradients, NO 3D render, NO painterly/airbrushed look, NO photographic realism.
+
+FORMAT: ONE wide LANDSCAPE illustration, full-bleed, filling the ENTIRE frame edge to edge (a full-screen GAME BACKGROUND: no padding, no border, NO magenta anywhere). The very top ~8% and bottom ~8% may be cropped.
+
+SCENE: a cosy place to write a thesis chapter: a research office desk (light wooden desk like the attached photo) seen from the side, a laptop showing a green crop growth curve from a simulation, a big jar of PEANUT BUTTER with a spoon in it, a small bowl of bright red CHILI peppers, potted plants (a pothos in a jar, an amaryllis), a purple office chair, a black bicycle helmet painted like a billiard 8-ball resting on a pile of papers, a window with the afternoon Mediterranean sun. Calm, warm, inviting. NO people, NO text, NO legible writing (the only allowed mark is the white circle with an "8" on the helmet).
+
+After image_gen returns, copy ONLY the PNG created by THIS Codex session to:
+  D:/workspace/pheno-quest/_orianegen/raw/bg_oriane_chapter.png
+CRITICAL: do NOT select "the newest PNG" globally from ~/.codex/generated_images. Use only the generated_images subdirectory for YOUR OWN Codex session id, or otherwise verify the file was produced by your own image_gen call. If you cannot identify it unambiguously, print FAIL_UNSAFE_COPY instead.
+Do NOT run chroma-key removal, do NOT delete files. Finally print exactly:
+  RAW: D:/workspace/pheno-quest/_orianegen/raw/bg_oriane_chapter.png (<W>x<H>)

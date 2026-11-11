@@ -23,3 +23,6 @@ _hud_avant_apres.png
 
 # Captures / logs du navigateur de test (Playwright MCP)
 .playwright-mcp/
+
+# local encoding cache of gen_assets_data.py
+.cache/

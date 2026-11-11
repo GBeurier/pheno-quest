@@ -402,6 +402,29 @@ window.CONFIG = {
       // Libelles HUD (font bitmap -> pas d'accents).
       labels: { shoot: 'NOTES', lob: 'POWER CHORD', ally: 'ETUDIANTS' },
     },
+    // ORIANE (kit 'chili'). SPACE: CHILI PEPPERS, same leveling as the seeds
+    //  (arsenal.graines), spinning (spin deg/s). X: PEANUT-BUTTER JAR that ROLLS
+    //  along the ground (rollJar in game.js): levels[power-1] = scale / damage per
+    //  enemy crushed / pierce (enemies crushed before it splats) / range px /
+    //  splat radius / sun cost. The X charge sets the speed (chargeMin..1 x speed).
+    //  bounces = walls it bounces off before splatting. radius = rolling radius px.
+    chili: {
+      chili: { sprite: 'ammo_chili', fire: 'ammo_chili_fire', fallback: 'ammo_graine', fallbackFire: 'ammo_graine_fire',
+               spin: 420, scale: 1,
+               // ON THE BIKE the peppers leave the CHILI CANNON on the handlebars
+               //  (oriane_bike sheet): muzzle offset from her feet (x toward
+               //  where she faces), + a short muzzle flash.
+               bikeMuzzle: { x: 44, y: -51 }, muzzleFlash: true },
+      jar: {
+        sprite: 'ammo_pbjar', fallback: 'ammo_gateau', speed: 420, chargeMin: 0.6, bounces: 1, radius: 17, life: 4,
+        levels: [
+          { scale: 0.85, damage: 2, pierce: 3, range: 560, splat: 72,  cost: 24 },
+          { scale: 1.0,  damage: 3, pierce: 5, range: 720, splat: 92,  cost: 32 },
+          { scale: 1.2,  damage: 4, pierce: 8, range: 900, splat: 116, cost: 40 },
+        ],
+      },
+      labels: { shoot: 'PIMENTS', lob: 'BEURRE DE CACAHUETE' },
+    },
   },
 
   // --- Ennemis (modeles) ----------------------------------------------
@@ -471,6 +494,14 @@ window.CONFIG = {
     oiseau:       { sprite: 'enemy_oiseau',  fallback: 'enemy_corbeau',  hp: 1, touchDamage: 1, move: 'dive',   speed: 110, range: 170, amp: 22, diveSpeed: 430, riseSpeed: 170, diveEvery: 2.4, anim: 'walk', score: 140, scale: 0.42, hit: { w: 0.86, h: 0.80 } },
     scooter:      { sprite: 'enemy_scooter', fallback: 'enemy_coursier', hp: 5, touchDamage: 2, move: 'patrol', speed: 210, range: 190, aggro: 520, anim: 'walk', score: 240, scale: 1.0, ignorePanel: true, hit: { w: 0.88, h: 0.80 } },
     piaf:         { sprite: 'enemy_oiseau',  fallback: 'enemy_corbeau',  hp: 1, touchDamage: 1, move: 'homing', speed: 150, life: 6.5, anim: 'walk', score: 30, scale: 0.3, hit: { w: 0.86, h: 0.80 } },
+    // --- ORIANE campaign (virtual crop-simulation world + lab) ---
+    //  RLOGO: R logo shooter (SticsRPacks) spitting red errors. JAVACUP: Java
+    //  coffee-cup charger (JavaStics). GLITCH: flying pixel bug. DOUTE: Woriane's
+    //  storm cloud of doubt, a slow homing minion with a limited life.
+    rlogo:        { sprite: 'enemy_rlogo',   fallback: 'enemy_imprimante', hp: 3, touchDamage: 1, move: 'shooter', shotEvery: 2.1, range: 440, shotSpeed: 250, anim: 'walk', score: 200, scale: 0.8, shot: 'shot_error', hit: { w: 0.80, h: 0.84 } },
+    javacup:      { sprite: 'enemy_javacup', fallback: 'enemy_cafard',     hp: 2, touchDamage: 1, move: 'chase',   speed: 175, range: 100, aggro: 520, anim: 'walk', score: 140, scale: 0.7, hit: { w: 0.80, h: 0.80 } },
+    glitch:       { sprite: 'enemy_glitch',  fallback: 'enemy_moustique',  hp: 1, touchDamage: 1, move: 'fly',     speed: 130, range: 160, amp: 40, anim: 'walk', score: 130, scale: 0.45, hit: { w: 0.86, h: 0.86 } },
+    doute:        { sprite: 'shot_doubt',    fallback: 'enemy_moustique',  hp: 1, touchDamage: 1, move: 'homing',  speed: 140, life: 6, score: 20, scale: 0.9, faceRight: true, hit: { w: 0.70, h: 0.60 } },
     // PASSANT = figurant ambiant INOFFENSIF (touchDamage 0) : fait les cent
     //  pas, ne blesse JAMAIS Laura. Le TUER ne rapporte rien (score 0) et fait
     //  PERDRE un TIER (cf. registerKill dans game.js) -> on est cense les
@@ -536,6 +567,27 @@ window.CONFIG = {
                     hp: 120, maxHp: 120, guard: 0.35, touchDamage: 2, shotSpeed: 330, speed: 150, range: 500, score: 3000, name: 'GARUDA, L HOMME-OISEAU', shot: 'shot_feather', net: 'shot_net',
                     hoverTime: 1.6, hoverAlt: 3.2, piafN: 3, netTime: 1.6, diveWarn: 0.6, diveSpeed: 720, stuckTime: 1.9, featherN: 5,
                     p2HoverAlt: 4.2, p2StuckTime: 1.4 },
+    // --- ORIANE campaign (cf. docs/superpowers/specs/2026-11-10-oriane-campaign-design.md) ---
+    //  STICS (oriane_simu, AI 'stics'): the STICS crop model come to life (a software window growing a voxel crop) that keeps crashing. compute -> fire
+    //  (3 duckable packet volleys) -> spray (nitrogen rain on marked spots) ->
+    //  [summon R/Java minion every summonEvery cycles] -> overheat -> CRASH
+    //  (blue screen = PUNISH, crashTime) -> reboot. P2: shorter cycles, a
+    //  stack-trace wall with a hole, more rain.
+    stics:        { sprite: 'boss_stics_move', attackSprite: 'boss_stics_atk', fallback: 'boss_rstudio_move', fallbackAtk: 'boss_rstudio_atk', behavior: 'stics',
+                    hp: 90, maxHp: 90, guard: 0.35, touchDamage: 2, shotSpeed: 250, speed: 0, range: 470, score: 1800, name: 'STICS, LE MODELE QUI PLANTE', shot: 'shot_packet', rain: 'shot_nitrogen',
+                    computeTime: 0.9, burstGap: 0.75, sprayTime: 1.5, rainN: 3, summonEvery: 2, minions: ['rlogo', 'javacup'], overheatTime: 0.7, crashTime: 2.6, rebootTime: 0.6,
+                    p2ComputeTime: 0.6, p2BurstGap: 0.55, p2RainN: 5, p2CrashTime: 1.9 },
+    //  WORIANE (oriane_labo, FINAL, AI 'woriane'): Oriane's dark twin. pace ->
+    //  ONE attack (chili fan / dark jar rolling on the floor / doubt clouds +
+    //  lightning; P2 adds a panic dash and a chili spiral) -> COLLAPSE (curled
+    //  up crying = PUNISH, collapseTime).
+    woriane:      { sprite: 'boss_woriane_move', attackSprite: 'boss_woriane_atk', fallback: 'boss_cendrine_move', fallbackAtk: 'boss_cendrine_atk', behavior: 'woriane',
+                    //  FINAL boss, the hardest of Oriane's: 15% bigger, aimed potshots while
+                    //  pacing, comboN attacks chained before each (short) collapse window.
+                    hp: 160, maxHp: 160, guard: 0.3, scale: 1.15, touchDamage: 2, shotSpeed: 300, speed: 150, range: 480, score: 3500, name: 'WORIANE, LA PART D OMBRE', shot: 'shot_darkchili',
+                    jar: 'shot_darkjar', bolt: 'shot_doubt', cloud: 'doute', keepGap: 3, paceTime: 0.8, potshotEvery: 0.9, comboN: 2,
+                    chiliN: 5, jarSpeed: 360, cloudN: 3, dashSpeed: 600, panicWaves: 4, panicN: 10, collapseTime: 1.4,
+                    p2PaceTime: 0.5, p2PotshotEvery: 0.6, p2ComboN: 3, p2ChiliN: 7, p2CloudN: 4, p2CollapseTime: 1.0 },
     // === FINETUNING : pour chaque boss, TOUS les params de timing lus par
     //  js/bosses.js sont exposes ici (avant, beaucoup n'avaient qu'un defaut code
     //  en dur, et certaines valeurs ici etaient PERIMEES et ecrasaient l'IA).
@@ -726,6 +778,32 @@ window.CONFIG = {
     ammo_note:           { sliceX: 6, anims: { spin: { from: 0, to: 5, loop: true, speed: 14 } } },
     ammo_note_fire:      { sliceX: 6, anims: { spin: { from: 0, to: 5, loop: true, speed: 16 } } },
     pickup_durian:       { sliceX: 4, anims: { idle: { from: 0, to: 3, loop: true, speed: 6 } } },
+    // Oriane: full profile silhouettes, 224 x 224 cells (same layout as Marcos).
+    oriane_idle:  { sliceX: 2, anims: { idle: { from: 0, to: 1, loop: true, speed: 2 } } },
+    oriane_run:   { sliceX: 4, anims: { run: { from: 0, to: 3, loop: true, speed: 10 }, idle: { from: 0, to: 3, loop: true, speed: 5 } } },
+    oriane_jump:  { sliceX: 2, anims: { jump: { from: 0, to: 1, loop: false, speed: 3 } } },
+    oriane_hurt:  { sliceX: 1, anims: { hurt: { from: 0, to: 0 } } },
+    oriane_throw: { sliceX: 2, anims: { throw: { from: 0, to: 1, loop: false, speed: 12 } } },
+    oriane_duck:  { sliceX: 3, anims: { duck: { from: 0, to: 2, loop: false, speed: 12 } } },
+    oriane_dash:  { sliceX: 1, anims: { dash: { from: 0, to: 0 } } },
+    oriane_dead:  { sliceX: 2, anims: { dead: { from: 0, to: 1, loop: false, speed: 5 } } },
+    // her bike + billiard 8-ball helmet (equipment.velo override: idle/run/jump)
+    oriane_bike:  { sliceX: 4, anims: { idle: { from: 0, to: 3, loop: true, speed: 6 }, run: { from: 0, to: 3, loop: true, speed: 12 }, jump: { from: 1, to: 1 } } },
+    ammo_chili:      { sliceX: 6, anims: { spin: { from: 0, to: 5, loop: true, speed: 14 } } },
+    ammo_chili_fire: { sliceX: 6, anims: { spin: { from: 0, to: 5, loop: true, speed: 16 } } },
+    enemy_rlogo:     { sliceX: 6, sliceY: 1, anims: { walk: { from: 0, to: 2, loop: true, speed: 8  }, hurt: { from: 3, to: 3 }, attack: { from: 4, to: 5, loop: true, speed: 10 } } },
+    enemy_javacup:   { sliceX: 6, sliceY: 1, anims: { walk: { from: 0, to: 2, loop: true, speed: 12 }, hurt: { from: 3, to: 3 }, attack: { from: 4, to: 5, loop: true, speed: 12 } } },
+    enemy_glitch:    { sliceX: 6, sliceY: 1, anims: { walk: { from: 0, to: 2, loop: true, speed: 14 }, hurt: { from: 3, to: 3 }, attack: { from: 4, to: 5, loop: true, speed: 14 } } },
+    boss_stics_move: { sliceX: 6, sliceY: 1, anims: { idle: { from: 0, to: 4, loop: true, speed: 8 }, hurt: { from: 5, to: 5 } } },
+    //  stics: 0 charge, 1 fires packets, 2 sprays nitrogen, 3 overheats, 4 crashed (blue screen), 5 reboot.
+    boss_stics_atk:  { sliceX: 6, sliceY: 1, anims: { attack: { from: 0, to: 5, loop: true, speed: 10 },
+                       charge: { from: 0, to: 0 }, fire: { from: 0, to: 1, loop: true, speed: 8 }, spray: { from: 2, to: 2 },
+                       overheat: { from: 3, to: 3 }, crash: { from: 4, to: 4 }, reboot: { from: 5, to: 5 } } },
+    boss_woriane_move: { sliceX: 6, sliceY: 1, anims: { idle: { from: 0, to: 4, loop: true, speed: 8 }, hurt: { from: 5, to: 5 } } },
+    //  woriane: 0 wind-up, 1 throws, 2 bowls a jar, 3 doubt cloud, 4 dash, 5 collapsed crying.
+    boss_woriane_atk:  { sliceX: 6, sliceY: 1, anims: { attack: { from: 0, to: 5, loop: true, speed: 10 },
+                         windup: { from: 0, to: 0 }, throw: { from: 0, to: 1, loop: false, speed: 6 }, bowl: { from: 2, to: 2 },
+                         doubt: { from: 3, to: 3 }, dash: { from: 4, to: 4 }, collapse: { from: 5, to: 5 } } },
     hero_idle:        { sliceX: 8, sliceY: 1, anims: { idle:  { from: 0, to: 7, loop: true,  speed: 8  } } },
     hero_run:         { sliceX: 8, sliceY: 1, anims: { run:   { from: 0, to: 7, loop: true,  speed: 14 } } },
     hero_jump:        { sliceX: 8, sliceY: 1, anims: { jump:  { from: 0, to: 7, loop: true,  speed: 10 } } },

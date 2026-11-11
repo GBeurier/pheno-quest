@@ -129,6 +129,16 @@ const JAVA_THEME = (front, extra) => Object.assign({
   passant: PASSANT_MARCOS('champ'),
 }, extra || {});
 
+// ORIANE campaign: shared pool + Oriane's dedicated NPCs (Marc Jaeger h_29,
+//  Thomas Arsouze h_30, Remy Vezy h_31), absent from Laura's and Marcos's
+//  levels. They "belong" to her levels via npcLevel 'oriane' (<-> key `level`
+//  in js/npc.js): they come out FIRST in each of her levels, then the pool.
+const ORIANE_HEADS = { h: PASSANT_HEADS.h.concat(['head_npc_h_29', 'head_npc_h_30', 'head_npc_h_31']), f: PASSANT_HEADS.f };
+const PASSANT_ORIANE = (biome) => Object.assign(PASSANT(biome), {
+  heads: ORIANE_HEADS,
+  femaleRatio: ORIANE_HEADS.f.length / (ORIANE_HEADS.f.length + ORIANE_HEADS.h.length),
+});
+
 // Les GRILLES de niveaux vivent dans levels/*.txt -> embarquees par
 //  gen_levels_data.py dans js/levels_data.js (window.LEVEL_MAPS), charge
 //  AVANT ce fichier dans index.html. Ici on ne garde que boss/theme/par.
@@ -170,6 +180,67 @@ window.LEVELS = {
     map: LEVEL_MAPS.marcos_parcelle,
   },
 
+
+  // ======================= ORIANE campaign (crop modelling) =======================
+  //  Cf. docs/superpowers/specs/2026-11-10-oriane-campaign-design.md.
+  //  New map chars: 'v' R logo (shooter), 'j' Java coffee cup (ground charger),
+  //  'h' glitch (flying pixel bug).
+  //  1. The apartment: Laura's apartment map and the same landlord boss.
+  oriane_appart: {
+    boss: 'proprietaire', music: 'niveau2', npcLevel: 'oriane',
+    par: { or: 180, argent: 270, bronze: 395 },
+    theme: {
+      sky: [196, 188, 206],
+      tint: [222, 212, 224],
+      layers: [
+        { sprite: ['bg_appart_a', 'bg_appart_b'], seq: true, band: true, parallax: 0.40, anchor: 'bot', y: 'ground', z: -22 },
+      ],
+      tiles: { '=': ['tile_sol_appart'], '-': ['tile_shelf_biblo'], 'x': ['tile_shelf_biblo'] },
+      panelLeg: 'shelf_leg',
+      indoor: true,
+      pickups: { data: 'pickup_pilule', page: 'pickup_page' },
+      hazard: ['hazard_acid'],
+      passant: PASSANT_ORIANE('pote'),
+    },
+    map: LEVEL_MAPS.niveau2,
+  },
+  //  2. Inside the crop model: pixel world, code, voxel crops -> STICS, the crop model that keeps crashing.
+  oriane_simu: {
+    boss: 'stics', music: 'niveau3', npcLevel: 'oriane',
+    par: { or: 115, argent: 170, bronze: 250 },
+    theme: {
+      sky: [18, 24, 54], tint: [226, 236, 255],
+      layers: [
+        { sprite: 'bg_simu_far', fallback: 'bg_mountains', band: true, parallax: 0.16, anchor: 'bot', y: 'ground', z: -26 },
+        { sprite: 'bg_simu_mid', fallback: 'bg_hills', band: true, parallax: 0.42, anchor: 'bot', y: 'ground', z: -24 },
+      ],
+      tiles: { '=': ['tile_sol_simu'], '-': ['tile_simu'], 'x': ['tile_simu'] },
+      panelLeg: 'simu_leg',
+      pickups: { data: 'pickup_chart', page: 'pickup_data' },
+      hazard: ['hazard_acid'],
+      passant: PASSANT_ORIANE('labo'),
+    },
+    map: LEVEL_MAPS.oriane_simu,
+  },
+  //  3. The lab: the real CIRAD corridor (photos) -> WORIANE, her dark twin (final).
+  oriane_labo: {
+    boss: 'woriane', music: 'niveau4', npcLevel: 'oriane',
+    par: { or: 130, argent: 190, bronze: 270 },
+    theme: {
+      sky: [214, 210, 196],
+      tint: [236, 232, 222],
+      layers: [
+        { sprite: ['bg_olab_a', 'bg_olab_b'], fallback: ['bg_couloir_a', 'bg_couloir_b'], seq: true, band: true, parallax: 0.40, anchor: 'bot', y: 'ground', z: -22 },
+      ],
+      tiles: { '=': ['tile_sol_olab'], '-': ['tile_shelf_books'], 'x': ['tile_shelf_books'] },
+      panelLeg: 'shelf_leg',
+      indoor: true,
+      pickups: { data: 'pickup_data', page: 'pickup_sheet' },
+      hazard: ['hazard_acid'],
+      passant: PASSANT_ORIANE('bureau'),
+    },
+    map: LEVEL_MAPS.oriane_labo,
+  },
 
   // --- INTRODUCTION : L'agriculteur fou — RIZIERES DE CAMARGUE, plein jour ----
   //  Installation de la manip + recolte de donnees. Le niveau INTRODUCTIF : le

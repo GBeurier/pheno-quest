@@ -50,6 +50,9 @@
   <script src="js/characters.js"></script>
   <!-- Sauvegardes (3 slots) + IA des boss -->
   <script src="js/save.js"></script>
+  <!-- Touches configurables (window.LQ_CONTROLS) : APRES save.js (prefs),
+       AVANT mobile.js / game.js (applique les touches du joueur a CONFIG.controls). -->
+  <script src="js/controls.js"></script>
   <script src="js/bosses.js"></script>
   <!-- Lecteur MIDI chiptune (window.LQ_MUSIC). APRES assets_data.js ET config.js
        (il capture window.ASSETS.music + window.CONFIG a son chargement),

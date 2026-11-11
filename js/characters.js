@@ -28,6 +28,30 @@ window.LQ_CHARACTERS = {
     // repli tant que la pose guitare (Imagen) n'est pas embarquee
     spriteFallback: { hero_throw: 'marcos_throw' },
   },
+  oriane: {
+    id: 'oriane', name: window.NPC.head_npc_f_21.prenom, campaign: 'oriane_these',
+    tagline: 'Piments, beurre de cacahuete et STICS', description: '3 chapitres + la soutenance',
+    accent: [196, 52, 64], preview: 'bg_oriane_map', previewFallback: 'bg_map',
+    // CHILI KIT (CONFIG.kits.chili): SPACE = chili peppers, X = rolling
+    //  peanut-butter jar. No ally (no C key, medals TEMPS + DATA). Her bike
+    //  (pickup 'Y') comes with the billiard 8-ball helmet and a CHILI CANNON on
+    //  the handlebars (oriane_bike; peppers fire from its muzzle, kits.chili.bikeMuzzle).
+    npcHead: 'head_npc_f_21', abilities: { cat: false }, kit: 'chili',
+    player: { areaScale: [0.46, 0.88], corpseSink: 2 },
+    sprites: {
+      hero_idle: 'oriane_idle', hero_run: 'oriane_run', hero_jump: 'oriane_jump',
+      hero_hurt: 'oriane_hurt', hero_throw: 'oriane_throw', hero_duck: 'oriane_duck',
+      hero_dash: 'oriane_dash', hero_dead: 'oriane_dead',
+      hero_bike: 'oriane_bike', hero_roll: 'oriane_run', hero_cat_out: null,
+      hero_run_throw: null, hero_bike_throw: null, hero_roll_throw: null, hero_duck_throw: null,
+    },
+    // fallbacks while Oriane's Imagen sheets are not embedded yet
+    spriteFallback: {
+      hero_idle: 'hero_idle', hero_run: 'hero_run', hero_jump: 'hero_jump', hero_hurt: 'hero_hurt',
+      hero_throw: 'hero_throw', hero_duck: 'hero_duck', hero_dash: 'hero_dash', hero_dead: 'hero_hurt',
+      hero_bike: 'hero_bike', hero_roll: 'hero_run',
+    },
+  },
 };
 
 // Validation au demarrage : une erreur de contenu ne doit pas ecraser une save.

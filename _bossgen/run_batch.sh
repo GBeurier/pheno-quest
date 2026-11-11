@@ -12,7 +12,12 @@ mkdir -p _bossgen/raw
 for b in "$@"; do
   log="_bossgen/gen_${b}.log"
   if [ ! -f "_bossgen/raw/${b}_move_sheet.png" ] || [ ! -f "_bossgen/raw/${b}_atk_sheet.png" ]; then
-    "$CODEX" exec --dangerously-bypass-approvals-and-sandbox < "_bossgen/prompts/${b}.txt" > "$log" 2>&1
+    # optional -i references: one repo-relative path per line in prompts/<boss>.refs
+    ref=()
+    if [ -f "_bossgen/prompts/${b}.refs" ]; then
+      while read -r r; do [ -n "$r" ] && [ -f "$r" ] && ref+=(-i "$r"); done < "_bossgen/prompts/${b}.refs"
+    fi
+    "$CODEX" exec --dangerously-bypass-approvals-and-sandbox "${ref[@]}" < "_bossgen/prompts/${b}.txt" > "$log" 2>&1
   fi
   for k in move atk; do
     if [ -f "_bossgen/raw/${b}_${k}_sheet.png" ]; then

@@ -52,5 +52,40 @@ window.LQ_CAMPAIGNS = (() => {
       },
       music: C.music,
     },
+    // Oriane: PhD in crop modelling (cf. docs/superpowers/specs/2026-11-10-oriane-campaign-design.md).
+    oriane_these: {
+      id: 'oriane_these', title: 'La these d Oriane',
+      levels: ['oriane_appart', 'oriane_simu', 'oriane_labo'], finalLevel: null,
+      world: { background: 'bg_oriane_map', fallbackBackground: 'bg_map', nodes: [
+        { key: 'oriane_appart', x: 196, y: 378, label: 'L APPART',       boss: 'FRANCOIS' },
+        { key: 'oriane_simu',   x: 440, y: 296, label: 'LA SIMULATION',  boss: 'STICS' },
+        { key: 'oriane_labo',   x: 736, y: 232, label: 'LE LABO',        boss: 'WORIANE' },
+      ] },
+      screens: { chapter: 'bg_oriane_chapter', win: 'bg_oriane_win', popup: 'bg_oriane_chapter',
+                 fallback: 'bg_chapter' },
+      startVehicle: { enabled: false },
+      story: {
+        title: 'ORIANE', subtitle: 'La these d Oriane',
+        intro: 'Oriane fait sa these sur la modelisation des cultures associees.\n' +
+               'Proprio grincheux, modele STICS qui plante sans arret... et pire : ses propres doutes.\n' +
+               'Sors les piments, roule le beurre de cacahuete et decroche ton PhD !',
+        hint: 'Gauche/Droite ou Q/D bouger   HAUT sauter (relache tot = petit saut)\n' +
+              'ESPACE piments   X (tiens) pot de beurre de cacahuete   MAJ dash   BAS+SAUT descend   ESC quitter',
+        overworld: 'Choisis une etape (ESPACE pour entrer)',
+        chapterDone: 'CHAPITRE ECRIT !', bossWarn: 'Bats le boss pour ecrire le chapitre !',
+        win: 'SOUTENANCE REUSSIE !  Felicitations Docteure Oriane !',
+        dead: 'ORIANE EST K.O. !', deadSub: 'ON REPREND LE CHAPITRE...',
+        publi: 'PUBLICATION TROUVEE ! +100%',
+        mention: 'MENTION TRES HONORABLE', feliJury: 'FELICITATIONS DU JURY',
+        progressLabel: 'Manuscrit', levelLabel: 'Chapitres', finishLabel: 'PhD', collectibleLabel: 'Publis',
+        medals: ['TEMPS', 'DATA'],
+        chapters: {
+          oriane_appart: 'CHAPITRE 1 : L etat de l art.\nFrancois a rendu les cles : l appart est calme, la biblio est bouclee !',
+          oriane_simu: 'CHAPITRE 2 : Les simulations.\nSTICS ne plante plus : la simulation tourne jusqu au bout, les courbes sont belles !',
+          oriane_labo: 'CHAPITRE 3 : La discussion.\nWoriane s evapore : plus de doutes, Oriane croit en elle. Place a la soutenance !',
+        },
+      },
+      music: C.music,
+    },
   };
 })();

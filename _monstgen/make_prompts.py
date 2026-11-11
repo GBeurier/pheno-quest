@@ -149,6 +149,22 @@ MONSTERS = {
    "riding in place, wheels spinning, exhaust puffing, the rider honking / leaning forward",
    "the scooter wobbling and skidding, the rice sack bouncing off, rider flailing",
    "charging forward full throttle, front wheel lifted in a wheelie, smoke trail behind"),
+ # ---- ORIANE campaign (virtual crop-simulation world) ----
+ 'rlogo': ('RIGHT',
+   "a living R PROGRAMMING LANGUAGE LOGO monster: a big bold blue capital letter R in front of a grey-silver ellipse ring (the recognisable R logo), with an angry cartoon face on the R, two little stubby legs and arms, a few tiny red 'Error' sparks around it (the R is the only letter allowed). Comedic code monster that the heroine hates.",
+   "standing and bouncing slightly, the grey ring wobbling, frowning",
+   "the R glitching and cracking with pixel noise, eyes squeezed shut",
+   "spitting a red error blob forward, mouth wide open, ring spinning"),
+ 'javacup': ('LEFT',
+   "a living JAVA COFFEE-CUP LOGO monster: a white-and-blue coffee cup on a saucer with two wavy orange-red STEAM curls rising above it (the recognisable Java logo), angry cartoon eyes on the cup, little running legs. No text, no letters. Comedic code monster.",
+   "trotting in place, steam curls swaying, coffee sloshing",
+   "the cup cracking, coffee splashing out, steam knocked away",
+   "charging forward head-first, steam flaring like horns, hot coffee spilling"),
+ 'glitch': ('RIGHT',
+   "a flying COMPUTER BUG / glitch: a cute pixelated BEETLE made of bright cyan, lime-green and magenta-free violet PIXEL BLOCKS, with flickering corrupted pixel edges, two antennae, little buzzing wings. Comedic software-bug pest, shown FLYING (no ground under it).",
+   "flying in place with a wing-buzz cycle, pixels flickering, body bobbing",
+   "breaking apart into scattered pixel blocks, dizzy",
+   "diving forward mandibles first, pixels streaking behind"),
 }
 
 import sys
