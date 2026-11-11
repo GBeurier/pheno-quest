@@ -1,0 +1,18 @@
+Use your built-in image_gen tool (the "imagegen" skill) to GENERATE raster pixel art. Do NOT use the CLI fallback (no OPENAI_API_KEY). Do NOT draw procedurally (no PIL/SVG/canvas). The artwork MUST come from your AI image generator. Generate exactly ONE image (ONE image_gen call).
+
+STYLE: retro 16-bit pixel art, cozy and CUTE storybook warmth (LucasArts / SNES adventure vibe), crisp visible square pixels, bold dark outlines, limited vibrant palette, flat cel shading, soft chunky readable shapes. NO smooth gradients, NO 3D render, NO painterly/airbrushed look, NO photographic realism.
+
+FORMAT: ONE wide LANDSCAPE illustration, full-bleed, filling the ENTIRE frame edge to edge (a full-screen GAME BACKGROUND: no padding, no border, NO magenta anywhere). The very top ~8% and bottom ~8% may be cropped.
+
+The ATTACHED image is the current world map of the game. REPRODUCE IT EXACTLY: same composition, same framing and size, same path, same three round sandy clearings at exactly the same places, same buildings, trees, sea, vineyard, same pixel style and palette.
+
+CHANGE ONLY ONE THING, inside the glowing blue PIXEL-GRID square zone in the middle (the virtual crop simulation, with the computer screen): REMOVE all the voxel MAIZE / corn plants (no corn cobs anywhere) and replace them with two crops drawn in the same blocky voxel style:
+- DWARF SORGHUM: several SHORT, stocky sorghum plants (knee-high, compact), broad green leaves and a dense upright reddish-brown / burgundy GRAIN HEAD (panicle) of round seeds on top of each one;
+- GIANT WHEAT: a few VERY TALL wheat stalks, clearly taller than everything else in the zone (twice the sorghum height or more), thin stems and long golden bearded WHEAT EARS with long awns.
+The contrast tiny sorghum / giant wheat must be obvious and funny. Keep the computer screen, the glowing cubes and the blue grid. Keep the central clearing plain and uncluttered. NO maize, NO text, NO labels.
+
+After image_gen returns, copy ONLY the PNG created by THIS Codex session to:
+  D:/workspace/pheno-quest/_orianegen/raw/bg_oriane_map_crops.png
+CRITICAL: do NOT select "the newest PNG" globally from ~/.codex/generated_images. Use only the generated_images subdirectory for YOUR OWN Codex session id, or otherwise verify the file was produced by your own image_gen call. If you cannot identify it unambiguously, print FAIL_UNSAFE_COPY instead.
+Do NOT run chroma-key removal, do NOT delete files. Finally print exactly:
+  RAW: D:/workspace/pheno-quest/_orianegen/raw/bg_oriane_map_crops.png (<W>x<H>)

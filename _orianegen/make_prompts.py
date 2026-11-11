@@ -241,11 +241,26 @@ ASSETS = {
    'UPPER-RIGHT. Along it, three clear empty round flat CLEARINGS (where level markers will be drawn, keep them plain '
    'and uncluttered): one at about 20% from the left / 72% from the top beside a small old APARTMENT building with a '
    'red-tiled roof and a bicycle parked in front; one at about 49% from the left / 57% from the top inside a strange '
-   'square zone where the landscape turns into glowing blue PIXEL GRID with giant voxel maize plants and a computer '
-   'screen (the virtual crop simulation); one at about 79% from the left / 44% from the top in front of a long white '
+   'square zone where the landscape turns into glowing blue PIXEL GRID with voxel DWARF SORGHUM (short, reddish grain heads) '
+   'and GIANT WHEAT (very tall golden ears) and a computer screen (the virtual crop simulation); one at about 79% from the left / 44% from the top in front of a long white '
    'research INSTITUTE building with orange doors and experimental INTERCROP fields (alternating stripes of wheat '
    'and peas). Olive trees, oleander bushes, vineyards and garrigue everywhere else, a strip of blue Mediterranean '
    'sea in the top-left corner. NO text, NO labels, NO signs, NO numbers.\n\n'),
+ # Edit of the v1 map: the simulation zone grows DWARF SORGHUM and GIANT WHEAT instead of maize
+ #  (everything else, notably the path and the 3 level clearings, must stay pixel-identical).
+ 'bg_oriane_map_crops': (['bg_oriane_map_v1.png'], HEAD + SCENE +
+   'The ATTACHED image is the current world map of the game. REPRODUCE IT EXACTLY: same composition, same framing and '
+   'size, same path, same three round sandy clearings at exactly the same places, same buildings, trees, sea, '
+   'vineyard, same pixel style and palette.\n\n'
+   'CHANGE ONLY ONE THING, inside the glowing blue PIXEL-GRID square zone in the middle (the virtual crop simulation, '
+   'with the computer screen): REMOVE all the voxel MAIZE / corn plants (no corn cobs anywhere) and replace them with '
+   'two crops drawn in the same blocky voxel style:\n'
+   '- DWARF SORGHUM: several SHORT, stocky sorghum plants (knee-high, compact), broad green leaves and a dense '
+   'upright reddish-brown / burgundy GRAIN HEAD (panicle) of round seeds on top of each one;\n'
+   '- GIANT WHEAT: a few VERY TALL wheat stalks, clearly taller than everything else in the zone (twice the sorghum '
+   'height or more), thin stems and long golden bearded WHEAT EARS with long awns.\n'
+   'The contrast tiny sorghum / giant wheat must be obvious and funny. Keep the computer screen, the glowing cubes and '
+   'the blue grid. Keep the central clearing plain and uncluttered. NO maize, NO text, NO labels.\n\n'),
  'bg_oriane_chapter': (['lab5.jpg'], HEAD + SCENE +
    'SCENE: a cosy place to write a thesis chapter: a research office desk (light wooden desk like the attached photo) '
    'seen from the side, a laptop showing a green crop growth curve from a simulation, a big jar of PEANUT BUTTER with '
