@@ -45,6 +45,10 @@ Non-goals: changing Laura's or Marcos's gameplay (every engine change is gated b
    - Tuning after playtest (2026-11-11): she was too passive -> 160 HP, 15% bigger, aimed potshots while
      pacing, 2 chained attacks per cycle (3 in P2), shorter collapse (1.4 s / 1.0 s). Sprite redone from
      Oriane's photos so she reads as Oriane's Wario-style twin (same face and hair, purple W hoodie, evil grin).
+     *(v2, 2026-11-12: Oriane redrawn at the Laura / Marcos pixel density in a colourful outfit — chili-red
+     paisley boho blouse, turquoise rolled-up trousers, yellow sneakers; Woriane = its dark plum / slate
+     colour-swap with a yellow W brooch. Prompts: `_orianegen/make_prompts.py` (`HERO_PIX`, `ORIANE`),
+     `_bossgen/make_prompts.py` (`style=FINE`); v1 raws kept as `*_v1.png`.)*
    After Woriane: win screen, **Docteure Oriane**.
 
 ## NPCs (`js/npc.js`, `level: 'oriane'` = priority in her 3 levels)

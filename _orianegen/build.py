@@ -35,8 +35,36 @@ jb.NO_DARK_KEY = {'bg_simu_far', 'bg_simu_mid'}       # dark navy pixels must su
 jb.SCREENS = {'bg_oriane_map': (1920, 1056), 'bg_oriane_chapter': (1672, 941), 'bg_oriane_win': (1672, 941)}
 
 CELL, FIG_H, BASE = 224, 200, 220
+# v2 sheets are fine, richly shaded pixel art: Lanczos downscale (premultiplied, binary alpha)
+#  keeps eyes / hair cleaner than nearest. False = nearest (v1 chunky sheets).
+SMOOTH = True
 STATES = {'idle': [0, 1], 'run': [4, 5, 6, 7], 'jump': [8, 9], 'hurt': [10], 'throw': [2, 3],
           'duck': [0, 12, 13], 'dash': [11], 'dead': [14, 15]}
+
+
+def despill(im):
+    """Remove the leftover magenta of the chroma key. Magenta-TINTED opaque pixels
+    (red and blue both well above green, e.g. thin bike spokes or hair wisps
+    anti-aliased against the #ff00ff background) are recoloured: interior ones
+    take the mean colour of their clean opaque neighbours, edge ones (touching
+    transparency, typically 1-px spokes) become a neutral grey of the same
+    lightness so the thin shape survives without the pink cast."""
+    a = np.array(im.convert('RGBA')).astype(np.int32)
+    r, g, b, al = a[..., 0], a[..., 1], a[..., 2], a[..., 3]
+    mag = (al > 0) & (((r - g > 14) & (b - g > 14) & (np.abs(r - b) < 60)) | ((b - g > 25) & (r - g > 40)))
+    if not mag.any():
+        return im
+    H, W = al.shape
+    ok = (al > 0) & ~mag
+    for y, x in zip(*np.where(mag)):
+        y0, y1, x0, x1 = max(0, y - 1), min(H, y + 2), max(0, x - 1), min(W, x + 2)
+        nb = ok[y0:y1, x0:x1]
+        if (al[y0:y1, x0:x1] == 0).any() or nb.sum() < 2:
+            v = int((r[y, x] + 2 * g[y, x] + b[y, x]) / 4)
+            a[y, x, :3] = (v, v, v)
+        else:
+            a[y, x, :3] = a[y0:y1, x0:x1, :3][nb].mean(axis=0)
+    return Image.fromarray(a.astype(np.uint8))
 
 
 def grid_cells(im, cols, rows):
@@ -60,12 +88,12 @@ def build_hero():
     cells, f = hero_factor()
     frames = []
     for i, c in enumerate(cells):
-        c = jb.resize_rgba(c, (max(1, round(c.width * f)), max(1, round(c.height * f))), nearest=True)
+        c = jb.resize_rgba(c, (max(1, round(c.width * f)), max(1, round(c.height * f))), nearest=SMOOTH is False)
         fr = Image.new('RGBA', (CELL, CELL))
         x = (CELL - c.width) // 2 + (12 if i == 3 else 0)    # throw release: arm forward, body stays put
         x = max(0, min(CELL - c.width, x))
         fr.alpha_composite(c.crop((0, 0, min(c.width, CELL), min(c.height, BASE))), (x, BASE - min(c.height, BASE)))
-        frames.append(fr)
+        frames.append(despill(fr))
     for st, idx in STATES.items():
         sheet = Image.new('RGBA', (CELL * len(idx), CELL))
         for k, i in enumerate(idx):
@@ -87,7 +115,7 @@ def build_bike():
     sheet = Image.new('RGBA', (W * 4, CELL))
     muzzles = []
     for i, c in enumerate(cells):
-        c = jb.resize_rgba(c, (max(1, round(c.width * k)), max(1, round(c.height * k))), nearest=True)
+        c = jb.resize_rgba(c, (max(1, round(c.width * k)), max(1, round(c.height * k))), nearest=SMOOTH is False)
         if c.width > W:
             c = jb.resize_rgba(c, (W, round(c.height * W / c.width)))
         # centre on the WHEELS (bottom 30%), not on the whole bbox: the cannon
@@ -105,6 +133,7 @@ def build_bike():
         if len(cc):
             j = cc.argmax()
             muzzles.append((x + cc[j] - W / 2, y + int(c.height * 0.35) + rr[j]))
+    sheet = despill(sheet)
     sheet.save(os.path.join(SPR, 'oriane_bike.png'), optimize=True)
     print('wrote oriane_bike from', src, sheet.size, 'hero factor %.3f bike factor %.3f' % (f, k))
     if muzzles:   # cell px, origin = cell centre-x / top; game units = /2 (art.scale), feet at BASE
@@ -216,7 +245,7 @@ def main():
             if all(have('olab_p%d' % i) for i in (1, 2, 3)): build_lab()
             else: print('skip olab (panels missing)')
             continue
-        if not have(n):
+        if not have(n) and not (n == 'oriane_bike' and have('oriane_bike_cannon')):
             print('skip (no raw)', n); continue
         if n == 'oriane_sheet': build_hero()
         elif n == 'oriane_bike': build_bike()

@@ -414,7 +414,7 @@ window.CONFIG = {
                // ON THE BIKE the peppers leave the CHILI CANNON on the handlebars
                //  (oriane_bike sheet): muzzle offset from her feet (x toward
                //  where she faces), + a short muzzle flash.
-               bikeMuzzle: { x: 44, y: -51 }, muzzleFlash: true },
+               bikeMuzzle: { x: 42, y: -60 }, muzzleFlash: true },
       jar: {
         sprite: 'ammo_pbjar', fallback: 'ammo_gateau', speed: 420, chargeMin: 0.6, bounces: 1, radius: 17, life: 4,
         levels: [

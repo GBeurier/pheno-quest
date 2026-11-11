@@ -39,7 +39,7 @@ PARAMS = {
     #  scale = ONE fixed factor for both sheets (move/atk), so the boss keeps the
     #  same size when it swaps sheets (= the smaller of the two auto factors).
     'stics':        dict(targeth=250, maxw=238, fit=True, scale=0.394),
-    'woriane':      dict(targeth=252, maxw=236, fit=True, even=True, scale=0.627),
+    'woriane':      dict(targeth=252, maxw=236, fit=True, even=True, scale=0.448),
 }
 
 def key_magenta(im, tol=72):
@@ -133,6 +133,23 @@ def strip_final_magenta(im):
     a[mag, 0:4] = 0
     return Image.fromarray(a.astype(np.uint8), 'RGBA')
 
+def drop_edge_bits(c, frac=0.2):
+    """Even cuts: remove the small islands that touch the cell's left/right edge
+    (a neighbour's smear, foot or thrown prop crossing the cell boundary)."""
+    from scipy import ndimage
+    a = np.array(c)
+    m = a[..., 3] > 0
+    lab, n = ndimage.label(m, structure=np.ones((3, 3)))
+    if n <= 1:
+        return c
+    sizes = ndimage.sum(m, lab, range(1, n + 1))
+    big = sizes.max()
+    for k in range(1, n + 1):
+        side = (lab[:, 0] == k).any() or (lab[:, -1] == k).any()
+        if side and sizes[k - 1] < frac * big:
+            a[lab == k] = 0
+    return Image.fromarray(a, 'RGBA')
+
 def run(inp, boss, kind, N):
     p = PARAMS.get(boss, PARAMS['default'])
     img = key_magenta(Image.open(inp))
@@ -146,6 +163,8 @@ def run(inp, boss, kind, N):
         x0 = max(0, x0 - pad)
         x1 = min(W, x1 + pad)
         c = img.crop((x0, 0, max(x0 + 1, x1), H))
+        if p.get('even'):
+            c = drop_edge_bits(c)
         bb = c.getbbox()
         cells.append(c.crop(bb) if bb else c)
     heights = sorted(c.height for c in cells)

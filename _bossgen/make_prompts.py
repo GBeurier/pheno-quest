@@ -11,7 +11,7 @@ OUT = os.path.join(ROOT, '_bossgen', 'prompts'); os.makedirs(OUT, exist_ok=True)
 
 COMMON = """Use your built-in image_gen tool (the "imagegen" skill) to GENERATE raster artwork. Do NOT use the CLI fallback (no OPENAI_API_KEY). Do NOT draw procedurally (no PIL/canvas/SVG). The artwork MUST come from your AI image generator. You will generate TWO sprite sheets for one boss character.
 
-PIXEL-ART STYLE (both sheets): retro 16-bit SNES / arcade run-and-gun look. Crisp visible square pixels, bold dark outline, limited vibrant palette, flat cel shading, chunky readable shapes. NO smooth gradients, NO anti-aliasing, NO airbrushed/painterly look, NO 3D.
+PIXEL-ART STYLE (both sheets): {style}
 
 LAYOUT for EACH sheet (critical): EXACTLY 6 frames in a SINGLE horizontal row, left to right, on a uniform grid of 6 equal cells. Same cell size for all; the character at the SAME scale, standing on the SAME ground baseline near the bottom of each cell; centered in its cell. Leave a WIDE empty magenta gap between consecutive frames (each frame a clearly separated island; frames MUST NOT touch or overlap; nothing crosses from one frame into a neighbour). Character identity, outfit and colors IDENTICAL across all 6 frames; only the POSE changes (one looping animation). The character FACES LEFT.
 
@@ -28,6 +28,15 @@ Generate SHEET 1 first (one image_gen call), cp it; then SHEET 2 (one image_gen 
   MOVE: {root}/_bossgen/raw/{boss}_move_sheet.png (<W>x<H>)
   ATK:  {root}/_bossgen/raw/{boss}_atk_sheet.png (<W>x<H>)
 """
+
+STYLE = ("retro 16-bit SNES / arcade run-and-gun look. Crisp visible square pixels, bold dark outline, limited "
+         "vibrant palette, flat cel shading, chunky readable shapes. NO smooth gradients, NO anti-aliasing, NO "
+         "airbrushed/painterly look, NO 3D.")
+# finer variant (same level as the Laura / Marcos heroes and the Garuda / Tikus bosses): per-boss 'style'
+FINE = ("richly shaded, finely detailed, crisp high-resolution 16-bit pixel art with SMALL pixels (the same pixel "
+        "density as the attached game sprites), soft multi-tone cel shading on skin, hair and fabric, subtle highlights, "
+        "thin dark outlines, many readable details. NOT chunky, NO big blocky pixels, NO thick black outlines, NO flat "
+        "4-colour shading, NO 3D render, NO photo-realism.")
 
 BOSSES = {
  'proprietaire': dict(
@@ -86,8 +95,9 @@ BOSSES = {
    atk="frame1 COMPUTING: a big progress bar and spinning hourglass in the window, the plant glowing, leaves raised; frame2 FIRES a burst of glowing cyan data cubes / pixel seeds from the window toward the LEFT; frame3 FERTILIZES: the plant sprays green nitrogen droplets (marked N) high up into the air; frame4 OVERLOAD: the window glowing red, the plant overgrown and twisted, warning triangles; frame5 CRASH (it PLANTS = it crashes): the window filled with red ERROR / exception popups stacked on each other and a sad face, the plant WILTED and drooping, frozen, a little smoke; frame6 RESTART: the plant a small seedling again in the window, a tiny progress bar restarting",
    textnote=" (the green calligraphic word \"stics\" of the logo IS allowed, since it is the character)"),
  'woriane': dict(
-   character="WORIANE, the EVIL TWIN of the heroine ORIANE, exactly like Wario is to Mario. ATTACHED: images 1-3 are PHOTOS of the real Oriane, image 4 is the sprite sheet of Oriane in this game. Woriane MUST be INSTANTLY RECOGNIZABLE AS ORIANE: the SAME face from the photos (same round face shape, same nose, same cheeks, same eyebrows), the SAME long wavy LIGHT-BROWN / chestnut hair falling below the shoulders with the same middle parting, the SAME body proportions, the SAME clothes cut (zip hoodie, jeans, sneakers, crossbody satchel) and the SAME pixel style as the sprite sheet. Only the attitude and the colours change: a MEAN, cocky, sly evil grin (Wario-like) with narrowed eyes and raised eyebrow, slight dark circles under the eyes (she embodies Oriane's doubts and anxiety), the hoodie colour-swapped to dark PURPLE with a jagged yellow W crest instead of the club crest, dark grey jeans, black sneakers, a faint violet shadow aura. NOT a goth, NOT a zombie, NOT grey skin: normal fair skin like Oriane, same hair colour. She is about 15% TALLER and more imposing than Oriane (boss size).",
-   idle="standing with a cocky menacing stance, smirking, tossing a dark chili pepper up and down in one hand, facing left",
+   style=FINE,
+   character="WORIANE, the EVIL TWIN of the heroine ORIANE, exactly like Wario is to Mario. ATTACHED: image 1 is the NEW sprite sheet of Oriane in this game (her exact look, outfit and pixel style), images 2-3 are PHOTOS of the real Oriane (face identity), image 4 is another boss of the game (GARUDA): STYLE, pixel density and BOSS SIZE reference only. Woriane MUST be INSTANTLY RECOGNIZABLE AS ORIANE: the SAME face (same oval face shape, nose, cheeks, eyebrows), the SAME long wavy LIGHT-BROWN / chestnut hair with lighter ends falling below the shoulders, the SAME body proportions and the SAME clothes CUT as image 1 (flowy boho blouse with rolled sleeves and a slim belt, trousers rolled up at the ankle, sneakers, small crossbody satchel). Only the attitude and the colours change (a dark colour-swap of Oriane's outfit): the blouse becomes deep PLUM / dark PURPLE with a small acid-GREEN paisley pattern and a jagged yellow W brooch, the trousers dark slate grey, the sneakers black with purple soles, the satchel black with a tiny dark-purple chili charm, a faint violet shadow aura. A MEAN, cocky, sly evil grin (Wario-like) with narrowed eyes and a raised eyebrow, slight dark circles under the eyes (she embodies Oriane's doubts and anxiety). NOT a goth, NOT a zombie, NOT grey skin: normal fair skin like Oriane, same hair colour. She is about 15% TALLER and more imposing than Oriane (boss size).",
+   idle="standing with a cocky menacing stance, smirking, tossing a dark purple chili pepper up and down in one hand, facing left",
    hurt="recoiling, hair flying, eyes squeezed shut, purple sparks, impact stars",
    atk="frame1 WIND-UP holding a dark purple chili pepper behind her; frame2 THROWS the dark chili hard toward the LEFT; frame3 crouches and BOWLS a dark jar along the ground toward the LEFT; frame4 hugs herself, head down, summoning a dark STORM CLOUD with a question mark above her head; frame5 DASHES / lunges to the LEFT leaving a purple smear; frame6 COLLAPSED: sitting on the ground curled up hugging her knees, crying, small sad tears (she is overwhelmed by doubt)"),
 }
@@ -97,7 +107,7 @@ ONLY = set(sys.argv[1:])            # noms en argument = n'ecrit que ceux-la
 for boss, d in BOSSES.items():
     if ONLY and boss not in ONLY:
         continue
-    body = COMMON.format(boss=boss, root=ROOT, character=d['character'],
+    body = COMMON.format(boss=boss, root=ROOT, character=d['character'], style=d.get('style', STYLE),
                          idle=d['idle'], hurt=d['hurt'], atk=d['atk'],
                          textnote=d.get('textnote', ''), facenote=d.get('facenote', ''))
     open(os.path.join(OUT, boss + '.txt'), 'w', encoding='utf-8').write(body)
