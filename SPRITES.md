@@ -30,8 +30,12 @@ Une valeur `null` désactive les calques de bras de Laura pour cette skin.
 transparente des poses de lancer. `abilities.cat` réserve le chat à Laura.
 
 `assets/sprites/bg_marcos_port.png` est un fond opaque généré avec **Imagegen
-intégré**, en prenant `bg_title.jpg` comme référence de style. Il est partagé par
-la sélection, la carte, le niveau et les écrans narratifs de Marcos. Le prompt
+intégré**, en prenant `bg_title.jpg` comme référence de style. Il sert de repli
+pour la carte, le niveau et les écrans narratifs de Marcos.
+
+`assets/sprites/bg_characters.png` (Imagegen, style `bg_title.jpg`) est le fond de
+l'écran de **sélection des personnages** : champ expérimental CIRAD (cabane, sorgho,
+rizières). Prompt : `_campaigngen/characters.prompt.txt`. Le prompt
 complet et la référence sont conservés dans `_campaigngen/port.prompt.txt`.
 Le niveau peut déclarer une couche `fullscreen: true` pour un fond fixe unique,
 sans créer les copies d'un panorama défilant.

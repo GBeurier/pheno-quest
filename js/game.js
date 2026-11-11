@@ -172,7 +172,7 @@
   // charge TOUT ce qui est dans window.ASSETS -> les variants numerotes
   // (enemy_criquet2, ...) sont pris en compte automatiquement.
   const SPRITES_FALLBACK = [
-    'body_champ_h', 'body_champ_h_dead', 'head_npc_h_25', 'head_npc_h_25_dead', 'bg_marcos_port',
+    'body_champ_h', 'body_champ_h_dead', 'head_npc_h_25', 'head_npc_h_25_dead', 'bg_marcos_port', 'bg_characters',
     'marcos_idle', 'marcos_run', 'marcos_jump', 'marcos_throw', 'marcos_hurt', 'marcos_duck', 'marcos_dash', 'marcos_dead',
     'hero_idle', 'hero_run', 'hero_jump', 'hero_hurt', 'hero_throw', 'cat_run',
     'ammo_graine', 'ammo_gateau',
@@ -5129,7 +5129,8 @@
   scene('characters', () => {
     playMusic(BASE.music.title);
     setCam(C.width / 2, C.height / 2); setCamAngle(0);
-    uiBg('bg_marcos_port', [91, 183, 231]);
+    // experimental crop field with the CIRAD hut (sorghum + rice); the old Java harbour stays as fallback
+    uiBg(['bg_characters', 'bg_marcos_port'], [91, 183, 231]);
     uiScrim(0, C.height, UI.NIGHT, 0.25);
     uiText('CHOISIS TON PERSONNAGE', 480, 46, 32, UI.GOLD, { shadow: true });
     uiText('1. PERSONNAGE    /    2. SAUVEGARDE    /    3. AVENTURE', 480, 90, 13, UI.CREAM, { outline: 2 });

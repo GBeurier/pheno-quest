@@ -1,0 +1,20 @@
+Use your built-in image_gen tool (the "imagegen" skill) to GENERATE raster pixel art. Do NOT use the CLI fallback (no OPENAI_API_KEY). Do NOT draw procedurally (no PIL/SVG/canvas). The artwork MUST come from your AI image generator. Generate exactly ONE image (ONE image_gen call).
+
+The ATTACHED image is the title screen of this game: match its art STYLE exactly (bright detailed retro pixel art, saturated sky blue, lush greens, brown ink contours, warm sunshine, the same pixel density) and REUSE its little wooden CIRAD research HUT with the thatched straw roof and the green "cirad" sign (the only lettering allowed).
+
+FORMAT: ONE wide 16:9 LANDSCAPE game background, full-bleed, filling the entire frame edge to edge (no border, no frame, no UI).
+
+SCENE: an EXPERIMENTAL CROP FIELD station of the CIRAD, wide eye-level side view (like the title screen):
+- the CIRAD hut stands on the RIGHT side of the image (its right half may be cut by the frame edge), with its "cirad" sign clearly visible;
+- on the LEFT: neat experimental plots of SORGHUM: rows of tall sorghum plants with broad green leaves and dense reddish-brown / burgundy grain heads on top, small white plot stakes with blank tags;
+- in the MIDDLE and FOREGROUND: flooded RICE paddies: bright green rice plants in neat rows standing in shiny shallow water reflecting the sky, low earthen bunds between the paddies;
+- a few research details: a small weather station mast, a wooden fence, a watering can, a wheelbarrow;
+- background: rolling green hills, open blue sky with sparse clouds (no big sun).
+COMPOSITION (critical): character cards will be drawn over the CENTRAL area, so put the interesting elements around it: the hut on the right edge, the sorghum on the left edge, the rice paddies across the BOTTOM 22% of the image, the top ~20% open sky. Keep the central area calm (paddies, hills, sky).
+NO people, NO animals, NO text except the cirad sign, NO labels, NO logos other than the cirad sign, NO watermark.
+
+After image_gen returns, copy ONLY the PNG created by THIS Codex session to:
+  D:/workspace/pheno-quest/_campaigngen/raw/bg_characters.png
+CRITICAL: do NOT select "the newest PNG" globally from ~/.codex/generated_images. Use only the generated_images subdirectory for YOUR OWN Codex session id, or otherwise verify the file was produced by your own image_gen call. If you cannot identify it unambiguously, print FAIL_UNSAFE_COPY instead.
+Do NOT delete files. Finally print exactly:
+  RAW: D:/workspace/pheno-quest/_campaigngen/raw/bg_characters.png (<W>x<H>)
