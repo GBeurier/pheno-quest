@@ -50,8 +50,16 @@ ORIANE = ('ORIANE (the playable heroine, a PhD student in crop modelling): a you
           'photos). COLOURFUL OUTFIT: a flowy CHILI-RED boho blouse with a small GOLDEN paisley pattern (like the red '
           'patterned blouse in her photo), sleeves rolled to the elbows, a slim brown belt, bright TURQUOISE / teal '
           'trousers rolled up at the ankle, SUNNY-YELLOW sneakers with white soles, a small tan leather crossbody '
-          'satchel with a tiny red chili-pepper charm. Slightly cartoon proportions exactly like Laura and Marcos '
-          '(NOT tiny chibi NPC proportions).')
+          'satchel with a tiny red chili-pepper charm.')
+
+# v3 (2026-11-12): the v2 sheet had realistic, tall adult proportions; the game's heroes are CARTOON.
+LAURA_PROPS = ('PROPORTIONS (CRITICAL, the main point of this sheet): EXACTLY the same CARTOON body proportions as LAURA '
+               '(attached): a BIG HEAD (about one third of the total body height, roughly 3 heads tall in total), large '
+               'expressive eyes, a small nose, a SHORT compact torso, SHORT legs, small hands and feet with slightly '
+               'chunky sneakers, a cute rounded silhouette, the same overall height-to-width ratio as Laura. Oriane '
+               'must look like Laura\'s sister character drawn by the same artist, standing next to her at the same '
+               'scale. NOT realistic proportions, NOT a tall slim adult with long legs, NOT a small head, NOT a fashion '
+               'figure. Her long hair is drawn big and voluminous like Laura\'s ponytail is.\n\n')
 
 SCENE = ('STYLE: retro 16-bit pixel art, cozy and CUTE storybook warmth (LucasArts / SNES adventure vibe), crisp visible '
          'square pixels, bold dark outlines, limited vibrant palette, flat cel shading, soft chunky readable shapes. '
@@ -96,12 +104,14 @@ TAIL = ('After image_gen returns, copy ONLY the PNG created by THIS Codex sessio
 
 ASSETS = {
  # ------------------------------------------------------------------ hero
- 'oriane_sheet': (['hero_idle.png', 'marcos_idle.png', 'oriane_smile.png', 'oriane_face.png', 'oriane_body.png'],
-   HEAD + HERO_PIX +
-   'ATTACHED IMAGES: image 1 is LAURA and image 2 is MARCOS, the two existing heroes of this game: they are the STYLE, '
-   'PIXEL DENSITY, SHADING and hero PROPORTIONS reference (match them closely; do not copy their faces or clothes). '
-   'Images 3-5 are PHOTOS of the real person to turn into the new hero: FACE and HAIR identity only (ignore her '
-   'clothes in the photos except the red patterned blouse idea).\n\n' + ORIANE + '\n\n'
+ 'oriane_sheet': (['hero_idle.png', 'hero_run.png', 'oriane_smile.png', 'oriane_face.png', 'oriane_body.png'],
+   HEAD + HERO_PIX.replace('the two existing heroes of the game (Laura and Marcos, attached)',
+                           'LAURA, the existing heroine of the game (attached)') + LAURA_PROPS +
+   'ATTACHED IMAGES: images 1-2 are sprite strips of LAURA, the existing heroine of this game (idle and run): they '
+   'are THE reference for art STYLE, PIXEL DENSITY, SHADING and above all body PROPORTIONS (match them closely; do not '
+   'copy her face, blonde hair, cat or clothes). Images 3-5 are PHOTOS of the real person to turn into the new hero: '
+   'FACE and HAIR identity only (ignore her clothes in the photos except the red patterned blouse idea).\n\n'
+   + ORIANE + '\n\n'
    'Draw her in STRICT RIGHT-FACING SIDE PROFILE in every frame: nose, chest, knees and toes point RIGHT, one visible '
    'eye, hair flowing behind her (not a frontal face pasted on a sideways body).\n\n'
    'LAYOUT (critical): ONE SQUARE sheet, EXACTLY 4 columns by 4 rows, sixteen equally sized square cells (no grid lines '
@@ -133,13 +143,15 @@ ASSETS = {
  # Oriane (v2 outfit, fine pixel art) on her bike WITH the CHILI CANNON on the handlebars (her chili peppers
  #  come out of it on the bike). Refs: the v2 hero sheet (identity / style), Laura's bike sheet (style + scale),
  #  the v1 cannon bike (layout + cannon design only).
- 'oriane_bike_cannon': (['oriane_sheet.png', 'hero_bike.png', 'oriane_bike_cannon_v1.png'],
-   HEAD + HERO_PIX +
+ 'oriane_bike_cannon': (['oriane_sheet.png', 'hero_bike.png', 'oriane_bike_cannon_v2.png'],
+   HEAD + HERO_PIX.replace('the two existing heroes of the game (Laura and Marcos, attached)',
+                           'LAURA, the existing heroine of the game (attached)') + LAURA_PROPS +
    'ATTACHED IMAGES: image 1 is the sprite sheet of ORIANE, the heroine: reproduce her EXACTLY (same face, hair, '
-   'chili-red paisley blouse, turquoise trousers, yellow sneakers, satchel, same pixel style and density). Image 2 '
-   'shows LAURA riding her bike in this game: STYLE, pixel density and SCALE reference. Image 3 is an OLD low-quality '
-   'draft of Oriane on her bike: use it ONLY for the layout (4 frames in one row) and the design of the chili cannon; '
-   'do NOT copy its chunky pixels nor its old black-hoodie outfit.\n\n'
+   'cartoon proportions, chili-red paisley blouse, turquoise trousers, yellow sneakers, satchel, same pixel style and '
+   'density). Image 2 shows LAURA riding her bike in this game: STYLE, pixel density, rider PROPORTIONS and SCALE '
+   'reference (Oriane sits on the bike with the same cartoon body, big head and short limbs as Laura). Image 3 is an '
+   'OLD draft of Oriane on her bike: use it ONLY for the layout (4 frames in one row), the black city bike and the '
+   'design of the chili cannon; do NOT copy its realistic tall-adult proportions.\n\n'
    'SUBJECT: Oriane RIDING a black city BICYCLE (black frame, a small rear rack with a red rear light, thin black '
    'wheels with fine spokes), in STRICT RIGHT-FACING SIDE PROFILE, leaning forward happily, pedalling. She wears a '
    'round glossy BLACK helmet painted exactly like a BILLIARD 8-BALL: shiny black dome with a white circle on its side '

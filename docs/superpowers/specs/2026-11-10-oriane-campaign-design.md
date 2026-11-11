@@ -49,6 +49,9 @@ Non-goals: changing Laura's or Marcos's gameplay (every engine change is gated b
      paisley boho blouse, turquoise rolled-up trousers, yellow sneakers; Woriane = its dark plum / slate
      colour-swap with a yellow W brooch. Prompts: `_orianegen/make_prompts.py` (`HERO_PIX`, `ORIANE`),
      `_bossgen/make_prompts.py` (`style=FINE`); v1 raws kept as `*_v1.png`.)*
+     *(v3, same day: v2 had realistic tall proportions. Redrawn with LAURA as the only style reference +
+     the photos (`LAURA_PROPS`: big head, short body), scaled to Laura's height (FIG_H 176, hitbox
+     `areaScale [0.46, 0.72]`); bike and Woriane regenerated from it; v2 raws kept as `*_v2.png`.)*
    After Woriane: win screen, **Docteure Oriane**.
 
 ## NPCs (`js/npc.js`, `level: 'oriane'` = priority in her 3 levels)

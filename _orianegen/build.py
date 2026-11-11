@@ -34,7 +34,7 @@ jb.BANDS = {
 jb.NO_DARK_KEY = {'bg_simu_far', 'bg_simu_mid'}       # dark navy pixels must survive the key
 jb.SCREENS = {'bg_oriane_map': (1920, 1056), 'bg_oriane_chapter': (1672, 941), 'bg_oriane_win': (1672, 941)}
 
-CELL, FIG_H, BASE = 224, 200, 220
+CELL, FIG_H, BASE = 224, 176, 220   # v3: cartoon proportions -> Laura's height (176), not Marcos' (200)
 # v2 sheets are fine, richly shaded pixel art: Lanczos downscale (premultiplied, binary alpha)
 #  keeps eyes / hair cleaner than nearest. False = nearest (v1 chunky sheets).
 SMOOTH = True

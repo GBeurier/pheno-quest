@@ -39,7 +39,7 @@ PARAMS = {
     #  scale = ONE fixed factor for both sheets (move/atk), so the boss keeps the
     #  same size when it swaps sheets (= the smaller of the two auto factors).
     'stics':        dict(targeth=250, maxw=238, fit=True, scale=0.394),
-    'woriane':      dict(targeth=252, maxw=236, fit=True, even=True, scale=0.448),
+    'woriane':      dict(targeth=212, maxw=236, fit=True, even=True, scale=0.481),   # v3 cartoon sheets (Oriane = Laura's size)
 }
 
 def key_magenta(im, tol=72):

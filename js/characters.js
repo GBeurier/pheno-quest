@@ -37,7 +37,7 @@ window.LQ_CHARACTERS = {
     //  (pickup 'Y') comes with the billiard 8-ball helmet and a CHILI CANNON on
     //  the handlebars (oriane_bike; peppers fire from its muzzle, kits.chili.bikeMuzzle).
     npcHead: 'head_npc_f_21', abilities: { cat: false }, kit: 'chili',
-    player: { areaScale: [0.46, 0.88], corpseSink: 2 },
+    player: { areaScale: [0.46, 0.72], corpseSink: 2 },   // v3 sprite: 176 px tall (Laura's size) in a 224 cell
     sprites: {
       hero_idle: 'oriane_idle', hero_run: 'oriane_run', hero_jump: 'oriane_jump',
       hero_hurt: 'oriane_hurt', hero_throw: 'oriane_throw', hero_duck: 'oriane_duck',
