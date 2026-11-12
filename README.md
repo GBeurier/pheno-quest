@@ -71,7 +71,8 @@ pour annuler). Le zoom desktop s'adapte désormais aux petites fenêtres.
    médailles adaptées aux capacités du personnage, son récapitulatif, puis affiche la conclusion.
 3. Ajouter le personnage dans `js/characters.js` : `id`, `name`, `campaign`,
    `tagline`, `description`, `accent`, `preview`. Le menu affiche automatiquement
-   deux cartes par page. Chaque nouveau personnage reçoit trois slots distincts.
+   tous les personnages côte à côte sur une ligne (les cartes rétrécissent
+   quand la distribution grandit). Chaque nouveau personnage reçoit trois slots distincts.
 4. Pour son apparence, fournir un `rig` (corps animé, tête, variantes KO, positions
    et clips) ou un dictionnaire `sprites` qui associe les noms `hero_*` partagés à
    ses feuilles dédiées (`null` désactive un calque partagé). `abilities.cat`

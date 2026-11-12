@@ -5222,7 +5222,7 @@
     });
   });
 
-  // --- SELECTION DU PERSONNAGE (2 cartes par page, catalogue extensible) ---
+  // --- SELECTION DU PERSONNAGE (tous les personnages cote a cote, pas de pagination) ---
   scene('characters', () => {
     playMusic(BASE.music.title);
     setCam(C.width / 2, C.height / 2); setCamAngle(0);
@@ -5233,23 +5233,25 @@
     uiText('1. PERSONNAGE    /    2. SAUVEGARDE    /    3. AVENTURE', 480, 90, 13, UI.CREAM, { outline: 2 });
     const ids = Object.keys(CHARACTERS);
     let cur = Math.max(0, ids.indexOf(SAVEAPI.loadPrefs().lastCharacter || CHARACTER.id));
+    // every card on one row: width shrinks with the cast (3 cards = 290 px each)
+    const GAP = 20, CARD_W = Math.min(354, Math.floor((910 - (ids.length - 1) * GAP) / ids.length));
+    const cardX = (i) => 480 + (i - (ids.length - 1) / 2) * (CARD_W + GAP);
+    const heroSize = Math.min(1.45, 1.45 * CARD_W / 354 + 0.2);
     let objects = [];
     const keep = (o) => { objects.push(...(o.group || [o])); return o; };
     function render() {
       objects.forEach((o) => destroy(o)); objects = [];
-      const page = Math.floor(cur / 2);
-      ids.slice(page * 2, page * 2 + 2).forEach((id, j) => {
-        const ch = CHARACTERS[id], selected = id === ids[cur], cx = 274 + j * 412;
-        keep(add([rect(354, 298, { radius: 20 }), pos(cx, 272), anchor('center'),
-          color(255, 244, 219), opacity(selected ? 0.97 : 0.85),
+      ids.forEach((id, i) => {
+        const ch = CHARACTERS[id], selected = i === cur, cx = cardX(i), tw = CARD_W - 28;
+        keep(add([rect(CARD_W, 298, { radius: 20 }), pos(cx, 272), anchor('center'),
+          color(255, 244, 219), opacity(selected ? 0.97 : 0.8),
           outline(selected ? 5 : 2, rgb(...(selected ? UI.GOLD : UI.INK))), z(3)]));
-        keep(uiPill(cx, 153, 326, 42, ch.accent, 1, 13, 4));
-        keep(uiText(ch.name.toUpperCase(), cx, 153, 26, UI.CREAM, { width: 310, outline: 2 }));
-        keep(menuHero(ch, cx, 325, 1.45));
-        keep(uiText(ch.tagline, cx, 350, 15, UI.INK, { width: 320, outline: 0 }));
-        keep(uiText(ch.description, cx, 383, 13, [113, 83, 56], { width: 320, outline: 0 }));
+        keep(uiPill(cx, 153, CARD_W - 28, 42, ch.accent, 1, 13, 4));
+        keep(uiText(ch.name.toUpperCase(), cx, 153, 26, UI.CREAM, { width: tw - 12, outline: 2 }));
+        keep(menuHero(ch, cx, 322, heroSize));
+        keep(uiText(ch.tagline, cx, 352, 14, UI.INK, { width: tw, outline: 0 }));
+        keep(uiText(ch.description, cx, 392, 13, [113, 83, 56], { width: tw, outline: 0 }));
       });
-      keep(uiText((cur + 1) + ' / ' + ids.length, 480, 436, 13, UI.CREAM, { outline: 2 }));
     }
     const move = (d) => { cur = (cur + ids.length + d) % ids.length; sfx('pickup'); render(); };
     const pick = () => {
@@ -5260,7 +5262,6 @@
     render();
     uiPill(480, 473, 330, 42, UI.RED, 1, 18, 5);
     uiText('CHOISIR CE PERSONNAGE', 480, 473, 18, UI.CREAM, { outline: 2 });
-    uiText('<', 46, 270, 32, UI.GOLD); uiText('>', 914, 270, 32, UI.GOLD);
     uiText('RETOUR', 86, 477, 14, UI.CREAM, { width: 140, outline: 2 });
     uiText('Fleches / Q D : choisir    Entree : valider    Echap : retour', 480, 512, 12, UI.CREAM, { outline: 2 });
     onKeys(C.controls.left, () => move(-1)); onKeys(C.controls.right, () => move(1));
@@ -5271,13 +5272,11 @@
         if (m.x < 166) go('title');
         else if (Math.abs(m.x - 480) < 165) pick();
       } else if (m.y > 122 && m.y < 422) {
-        if (m.x < 75) move(-1);
-        else if (m.x > 885) move(1);
-        else {
-          const j = Math.abs(m.x - 274) < 177 ? 0 : (Math.abs(m.x - 686) < 177 ? 1 : -1);
-          const n = Math.floor(cur / 2) * 2 + j;
-          if (j >= 0 && n < ids.length) { cur = n; render(); }
-        }
+        // tap a card to select it, tap the selected card again to play
+        const i = ids.findIndex((_, k) => Math.abs(m.x - cardX(k)) < CARD_W / 2);
+        if (i < 0) return;
+        if (i === cur) pick();
+        else { cur = i; sfx('pickup'); render(); }
       }
     });
   });
