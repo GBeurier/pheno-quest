@@ -5,19 +5,30 @@ dans `js/assets_data.js` : aucun téléchargement pendant la partie.
 
 | Fichier | Niveau | Morceau | Source |
 | --- | --- | --- | --- |
-| `oriane_niveau1.mid` | L’appart | Bad Bunny — Tití Me Preguntó | [MIDI DB / Hit Trax](https://www.mididb.com/bad-bunny/titi-me-pregunto-midi/) |
-| `oriane_niveau2.mid` | La simulation | Jeff Mills — The Hacker | [Nonstop2k](https://www.nonstop2k.com/midi-files/14063-jeff-mills-the-hacker-midi.html) |
+| `oriane_niveau1.mid` | L’appart | Daddy Yankee — Gasolina | [Midis101](https://www.midis101.com/free-midi/9352-daddy-yankee-gasolina) |
+| `oriane_niveau2.mid` | La simulation | Worakls — Salzburg | [Nonstop2k](https://www.nonstop2k.com/midi-files/16533-worakls-salzburg-midi.html) |
 | `oriane_niveau3.mid` | Le labo | Bad Bunny — DtMF | [MIDI DB / Hit Trax](https://www.mididb.com/bad-bunny/dtmf-midi/) |
 
-Téléchargés le 12 novembre 2026. Les deux Bad Bunny sont des **extraits de
-démonstration**, proposés gratuitement par MIDI DB, et non les morceaux complets.
+Téléchargés le 12 novembre 2026. Gasolina est une séquence complète de reggaeton
+(environ 3 min 33 s). Salzburg est un arrangement partiel mélodique d’environ
+65 secondes, proposé en téléchargement « Regular / Free » par Nonstop2k.
+DtMF est un **extrait de démonstration**, proposé gratuitement par MIDI DB.
 Le téléchargement gratuit ne constitue pas une licence de redistribution ni de
 synchronisation ; aucune licence libre n’est revendiquée ici.
 
 Préparation des boucles (sans changer le lecteur partagé) :
 
-- Tití Me Preguntó : fichier `AUD_RC4865.mid`, 480 ticks/noire ; conservation des
-  ticks 0 à 23040 (12 mesures à 103 BPM, environ 28 secondes).
+- Gasolina : conservation de toute la durée et des canaux source 2, 3, 4, 8, 9,
+  10, 11 et 13 (numérotation MIDI de 1 à 16). Suppression des couches de bruitages
+  et doublures pour laisser respirer la mélodie. Les vélocités intègrent les volumes
+  et expressions CC7/CC11 du fichier, avec un facteur global de 0,75.
+  La partie rythmique XG du canal 11 est réunie avec les percussions GM du canal 10 ;
+  les notes 33, 39, 79, 86 et 104 deviennent respectivement 36, 38, 46, 46 et 42.
+  Les messages SysEx propres au matériel sont retirés pour rester compatibles avec
+  le lecteur SMF du jeu. La première mesure silencieuse (768 ticks, environ 2,47 s)
+  est retirée : la musique démarre immédiatement et dure environ 3 min 30 s.
+- Salzburg : les quatre canaux mélodiques sont conservés ; vélocités pondérées à
+  65 %, 80 %, 45 % et 45 % pour distinguer basse, mélodie et accompagnement.
 - DtMF : fichier `AUD_FV0035.mid`, 48 ticks/noire ; conservation des ticks 384 à
   2688 (12 mesures à 113 BPM, environ 25,5 secondes). Suppression de l’introduction
   silencieuse et du marqueur de fin à 208 secondes qui aurait provoqué un long blanc.
@@ -25,9 +36,5 @@ Préparation des boucles (sans changer le lecteur partagé) :
   les métadonnées initiales sont conservés. Le dernier départ de note de DtMF,
   à moins de 40 ms de la coupe, est retiré pour respecter la durée minimale du
   lecteur et conserver une reprise sur la mesure.
-- The Hacker : arrangement complet proposé en téléchargement « Regular / Free »
-  par Nonstop2k, conservé sans modification (format 1, 155 BPM, environ 4 min 20 s).
-  Les quatre canaux, dont les percussions GM sur le canal 10, passent par le
-  synthétiseur chiptune partagé.
 
 Après remplacement d’une piste : `python gen_assets_data.py`.
