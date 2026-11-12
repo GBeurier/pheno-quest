@@ -1783,15 +1783,19 @@
     return ok.length ? ok.join(',') : null;
   }
 
-  function npcBubble(e, phrase, dur) {
+  // opts (menu scenes): { z, headTop: (e) => y, textWidth } -- default = in-level NPC.
+  function npcBubble(e, phrase, dur, opts) {
+    opts = opts || {};
+    const headTop = opts.headTop || npcHeadTop;
     const pad = 9, tail = 13;
     const cfg = (LEVEL && LEVEL.theme && LEVEL.theme.passant && LEVEL.theme.passant.bubble) || {};
     // Avec les fonts TTF embarquees, la phrase s'affiche TELLE QUELLE (accents,
     //  khmer...) ; sans elles, repli font bitmap + accents translitteres.
     const fnt = bubbleFont(cfg);
-    const topts = { size: 13, width: 175, align: 'center' };
+    const topts = { size: 13, align: 'center' };
+    if (opts.textWidth !== 0) topts.width = opts.textWidth || 175;   // 0 = natural width (short lines)
     if (fnt) topts.font = fnt;
-    const b = add([pos(e.pos.x, npcHeadTop(e)), z(-0.5), 'bubble', { t: 0 }]);
+    const b = add([pos(e.pos.x, headTop(e)), z(opts.z != null ? opts.z : -0.5), 'bubble', { t: 0 }]);
     const label = b.add([
       text(fnt ? phrase : stripAccents(phrase), topts),
       color(40, 32, 26), anchor('center'), pos(0, 0), z(2),
@@ -1823,7 +1827,7 @@
       const half = w / 2 + 6;
       b.pos = vec2(
         Math.max(cx - C.width / 2 + half, Math.min(cx + C.width / 2 - half, e.pos.x)),
-        npcHeadTop(e) - 4);
+        headTop(e) - 4);
     });
     return b;
   }
@@ -4960,10 +4964,89 @@
     ]);
 
     // --- decor : Laura plantee sur l'herbe, en bas a gauche -------------
-    menuHero(CHARACTERS.laura, 116, C.height - 54, 1.45, 4);
-    menuHero(CHARACTERS.marcos, 228, C.height - 54, 1.3, 4);
-    // Oriane on the right of the CIRAD hut, facing the two others (the start banner covers x 245-735)
-    menuHero(CHARACTERS.oriane, C.width - 92, C.height - 54, 1.3, 4).flipX = true;
+    // --- the PhD students stroll on the grass, meet face to face and chat in
+    //  Sims-like gibberish bubbles. Hero sheets face RIGHT (flipX = left).
+    //  Chats happen in the clear zones left / right of the start banner
+    //  (x 245-735); strolls may pass behind it.
+    const GROUND = C.height - 54, WALK = 52, XMIN = 50, XMAX = C.width - 50;
+    const strollers = [
+      [CHARACTERS.laura, 116, 1.45], [CHARACTERS.marcos, 228, 1.3], [CHARACTERS.oriane, C.width - 92, 1.3],
+    ].filter(([ch]) => ch).map(([ch, x, size]) => {
+      const o = menuHero(ch, x, GROUND, size, 4);
+      o.st = 'idle'; o.wait = rand(0.5, 2.5); o.tx = x; o.mate = null;
+      return o;
+    });
+    if (strollers[2]) strollers[2].flipX = true;          // Oriane starts facing the two others
+    const heroHeadTop = (o) => o.pos.y - o.height * Math.abs(o.scale.y) * 0.8;
+    const GLYPHS = '@#$%&*?!~^+=<>§¤¶ΔΣΩψжЯ☼♪♫☆✿♣♠♥';
+    const gibberish = () => {
+      const words = Math.floor(rand(1, 4));
+      const out = [];
+      for (let w = 0; w < words; w++) {
+        let s = '';
+        for (let i = Math.floor(rand(2, 6)); i > 0; i--) s += GLYPHS[Math.floor(rand(0, GLYPHS.length))];
+        out.push(s);
+      }
+      return out.join(' ') + (rand() < 0.5 ? (rand() < 0.5 ? ' !' : ' ?') : '');
+    };
+    const walkTo = (o, x) => {
+      o.tx = Math.max(XMIN, Math.min(XMAX, x)); o.st = 'walk';
+      setAnim(o, 'hero_run', 'run'); o.animSpeed = 0.6;
+    };
+    const stop = (o, st) => { o.st = st; setAnim(o, 'hero_idle', 'idle'); o.animSpeed = 1; };
+    let chat = null, chatCd = rand(2, 4);
+    // one chat at a time: two free heroes walk to a meeting spot, face each
+    //  other, then trade 4-6 bubbles (one at a time, alternating speakers).
+    const startChat = () => {
+      const free = strollers.filter((o) => !o.mate);
+      if (free.length < 2) return;
+      const a = free.splice(Math.floor(rand(0, free.length)), 1)[0];
+      const b = free[Math.floor(rand(0, free.length))];
+      // meet in the clear zone (left/right of the banner) farthest from the
+      //  third student, so nobody stands in the middle of the chat
+      const others = strollers.filter((o) => o !== a && o !== b).map((o) => (o.st === 'walk' ? o.tx : o.pos.x));
+      const zones = [rand(110, 180), rand(800, 870)];
+      const far = (zx) => Math.min(...others.map((x) => Math.abs(x - zx)), 1e9);
+      const cx = others.length ? (far(zones[0]) >= far(zones[1]) ? zones[0] : zones[1]) : zones[Math.floor(rand(0, 2))];
+      const [l, r] = a.pos.x <= b.pos.x ? [a, b] : [b, a];   // no crossing: the left one stays left
+      l.mate = r; r.mate = l;
+      walkTo(l, cx - 44); walkTo(r, cx + 44);
+      chat = { l, r, lines: Math.floor(rand(4, 7)), next: 0.3, speaker: rand() < 0.5 ? l : r, bubble: null };
+    };
+    const endChat = () => {
+      [chat.l, chat.r].forEach((o) => { o.mate = null; stop(o, 'idle'); o.wait = rand(1, 3); });
+      chat = null; chatCd = rand(3, 6);
+    };
+    onUpdate(() => {
+      strollers.forEach((o) => {
+        if (o.st === 'walk') {
+          const d = o.tx - o.pos.x, step = WALK * dt();
+          o.flipX = d < 0;
+          if (Math.abs(d) <= step) { o.pos.x = o.tx; stop(o, o.mate ? 'ready' : 'idle'); o.wait = rand(1.5, 4); }
+          else o.pos.x += Math.sign(d) * step;
+        } else if (o.st === 'idle' && !o.mate) {
+          o.wait -= dt();
+          if (o.wait <= 0) {
+            // stroll somewhere not already taken (never walk into a chat or onto a friend)
+            const busy = strollers.filter((q) => q !== o).map((q) => (q.st === 'walk' ? q.tx : q.pos.x));
+            const ok = (x) => busy.every((bx) => Math.abs(bx - x) > 95);
+            let x = null;
+            for (let k = 0; k < 8 && x == null; k++) { const c = Math.max(XMIN, Math.min(XMAX, o.pos.x + rand(-300, 300))); if (ok(c)) x = c; }
+            if (x != null) walkTo(o, x); else o.wait = rand(1, 2);
+          }
+        }
+      });
+      if (!chat) { chatCd -= dt(); if (chatCd <= 0) startChat(); return; }
+      if (chat.l.st !== 'ready' || chat.r.st !== 'ready') return;
+      chat.l.flipX = false; chat.r.flipX = true;           // face to face
+      if (chat.bubble && chat.bubble.exists()) return;
+      chat.next -= dt();
+      if (chat.next > 0) return;
+      if (chat.lines-- <= 0) { endChat(); return; }
+      chat.bubble = npcBubble(chat.speaker, gibberish(), rand(1.3, 2), { z: 9, headTop: heroHeadTop, textWidth: 0 });
+      chat.speaker = chat.speaker === chat.l ? chat.r : chat.l;
+      chat.next = rand(0.15, 0.5);
+    });
 
     // --- titre : grand, dore, contour epais + bob ----------------------
     const titleY = 74;
@@ -5571,7 +5654,10 @@
     uiAppear(uiText(C.story.chapters[C.levels[idx]] || '', C.width / 2, 418, 17, UI.CREAM, { outline: 2, z: 7, width: 724, lineSpacing: 6 }), 0.4, 16);
 
     uiPrompt(C.story.retry, C.width / 2, 492, 0.58);
-    const next = () => go(!CAMPAIGN.finalLevel && idx === C.levels.length - 1 && SAVEAPI.finished(SAVE) ? 'win' : 'overworld', data);
+    // Campaign without a jury (Marcos, Oriane): the LAST chapter is the defense
+    //  -> always the victory screen, like Laura's jury (even if an earlier level
+    //  was skipped with a cheat key / dev URL; its completion % shows it).
+    const next = () => go(!CAMPAIGN.finalLevel && idx === C.levels.length - 1 ? 'win' : 'overworld', data);
     onConfirm(next); onClick(next); onBack(next);
   });
 
@@ -5586,7 +5672,8 @@
     const best = SAVE ? SAVE.bestScore : (data ? data.score : 0);
 
     uiBg([CAMPAIGN.screens.win, CAMPAIGN.screens.fallback], [255, 206, 110]);
-    if (CHARACTER.id !== 'laura') menuHero(CHARACTER, 480, 310, 1.4, 4);
+    // screens.winHero = the victory picture already paints the graduate hero.
+    if (!CAMPAIGN.screens.winHero) menuHero(CHARACTER, 480, 310, 1.4, 4);
     uiConfetti([UI.GOLD, UI.RED, UI.CREAM, [120, 200, 255], UI.GREEN], 0.05, {});  // pluie de confettis
 
     // --- Cortege d'applaudissements ------------------------------------
@@ -5629,7 +5716,7 @@
       if (!deck.length) return;                    // aucune tete dispo -> rien a defiler
       // Au raccord (remelange), evite quand meme un doublon avec ceux DEJA a
       //  l'ecran : on prend la 1ere carte dont la tete n'est pas visible.
-      const onScreen = new Set(get('parade').map((p) => p.head));
+      const onScreen = new Set(get('parade').map((p) => p.headName));
       let idx = deck.findIndex((c) => !onScreen.has(c.head));
       if (idx < 0) idx = 0;
       const card = deck.splice(idx, 1)[0];
@@ -5647,19 +5734,63 @@
       const tint = CLAP_TINTS[(clapSeq++) % CLAP_TINTS.length];
       const e = add([
         sprite(bodyName), artScale(vs),
-        pos(C.width + rand(20, 90), 528), anchor('bot'), z(20),
+        pos(C.width + rand(20, 90), 528), anchor('bot'), z(20), area(),
         color(tint[0], tint[1], tint[2]),
-        'parade', { phase: rand(0, Math.PI * 2), spd: rand(64, 104), passantScale: vs, head: headName },
+        'parade', { phase: rand(0, Math.PI * 2), spd: rand(64, 104), passantScale: vs, headName, sex },
       ]);
       try { e.play('clap'); } catch (er) { playIfAnim(e, bodyName); }
-      e.onUpdate(() => { e.pos.x -= e.spd * dt(); if (e.pos.x < -90) destroy(e); });
+      e.onUpdate(() => { if (!e.dead) e.pos.x -= e.spd * dt(); if (e.pos.x < -90) destroy(e); });
       // tete : MEME attache que l'ingame (attachHead -> meme stitch du cou,
       //  meme headLocal/headScale/dodelinement). Le cortege passe DEVANT tout
       //  (plaque/pastilles/texte/consigne, z<=8) -> corps z20, tete z21.
       const h = attachHead(e, pc, sex, headName);
-      if (h) h.use(z(21));
+      if (h) { h.use(z(21)); h.use(area()); }
       return e;
     };
+    // Mouse click / tap on a clapping colleague: shot down like in the game.
+    //  Same look as corpsify (slumped body_<biome>_<sex>_dead + zombie head),
+    //  but this is a menu scene (no physics), so it is done in place. The
+    //  corpse stays where it fell, under the living parade, and leaves the
+    //  parade count so new colleagues keep coming.
+    const deadBodyFor = (sex) => [
+      'body_clap_' + sex + '_dead',
+      ...(((pc.bodies && pc.bodies[sex]) || []).map((b) => b + '_dead')),
+      'body_champ_' + sex + '_dead',
+    ].find((n) => hasSprite(n));
+    // ONE victim per click: among the hovered colleagues (body or head), the
+    //  one whose centre is closest to the pointer (they often overlap).
+    onMousePress(() => {
+      const m = mousePos();
+      const hit = get('parade').filter((e) => e.isHovering() || (e.head && e.head.exists() && e.head.isHovering && e.head.isHovering()));
+      if (!hit.length) return;
+      hit.sort((a, b) => Math.abs(a.pos.x - m.x) - Math.abs(b.pos.x - m.x));
+      killClapper(hit[0]);
+    });
+    function killClapper(e) {
+      if (!e || !e.exists() || e.dead) return;
+      e.dead = true;
+      e.untag('parade'); e.tag('parade_corpse');
+      e.z = 19;
+      try { e.stop(); } catch (_) {}
+      const db = deadBodyFor(e.sex);
+      if (db) {
+        e.use(sprite(db)); playIfAnim(e, db);
+        if (!/^body_clap_/.test(db)) e.color = rgb(255, 255, 255);   // tint was meant for the grey clap clothes
+      } else {
+        e.angle = -90;                       // fallback: topple over (pivot = feet)
+      }
+      const h = e.head;
+      if (h && h.exists()) {
+        h.dead = true; h.z = 19.5;
+        h.pos.y = h.baseY + (h.deadDrop || 0);
+        if (h.deadScale && h.deadScale !== 1) h.scale = h.scale.scale(h.deadScale);
+        h.angle = rand(-8, 8);
+        const dn = e.headName + '_dead';
+        if (hasSprite(dn)) { try { h.stop(); } catch (_) {} h.use(sprite(dn)); }
+      }
+      addPoof(e.pos.x, e.pos.y - 40);
+      sfx('hit');
+    }
     const parade = add([pos(0, 0), { t: 0, acc: PARADE_GAP }]);
     parade.onUpdate(() => {
       parade.t += dt();
@@ -5697,9 +5828,11 @@
       }
     }
 
-    uiPrompt(C.story.retry, C.width / 2, 490, 0.58);
-    const again = () => go('overworld');
-    onConfirm(again); onClick(again); onBack(again);
+    // Only the quit key (ESC by default) leaves, back to the title screen:
+    //  clicks are for the parade (killClapper), and a stray SPACE/ENTER no
+    //  longer skips the celebration.
+    uiPrompt(String(C.story.winQuit || '{key} : retour au titre').replace('{key}', keyLabel('quit')), C.width / 2, 490, 0.58);
+    onBack(() => go('title'));
   });
 
   scene('lose', (data) => {

@@ -1,0 +1,17 @@
+Use your built-in image_gen tool (the "imagegen" skill) to GENERATE raster pixel art. Do NOT use the CLI fallback (no OPENAI_API_KEY). Do NOT draw procedurally (no PIL/SVG/canvas). The artwork MUST come from your AI image generator. Generate exactly ONE image (ONE image_gen call), passing ALL the attached reference images to image_gen as references.
+
+STYLE: retro 16-bit pixel art, cozy and CUTE storybook warmth (LucasArts / SNES adventure vibe), crisp visible square pixels, bold dark outlines, limited warm vibrant palette, flat cel shading, soft chunky readable shapes. Match the look of the attached backgrounds exactly. NO smooth gradients, NO 3D render, NO painterly look, NO photographic realism.
+
+FORMAT: ONE wide LANDSCAPE illustration (16:9), full-bleed, filling the ENTIRE frame edge to edge (a full-screen GAME BACKGROUND: no padding, no border, NO magenta anywhere).
+
+REFERENCES: image 1 is the CURRENT background of this screen: KEEP its setting, palette, sky, sun, trees, fields and thrown graduation caps almost identical. Image 2 (and image 3) show the HERO to draw. The LAST image is another character's victory screen, used ONLY as a reference for the pose, the outfit (black academic gown + mortarboard), the size and the framing: do NOT copy that girl, her cat, the solar panels or the rice.
+
+SCENE: the same joyful PhD graduation celebration at golden hour, now with the hero in it. In the CENTRE of the image, ORIANE, the young woman PhD student shown in the attached game sprite and face reference: very long wavy auburn-brown hair, warm smile, red-orange patterned blouse, teal rolled-up jeans, yellow sneakers, a brown shoulder bag with a small red chili pepper charm. Keep her face, hair and colours recognisable. The hero is JUMPING FOR JOY, both feet off the ground, legs tucked, both arms raised high, one hand triumphantly holding up a thick bound thesis book, mouth wide open in a happy shout. The hero wears an OPEN black doctoral graduation GOWN with golden trim over the usual clothes and a black graduation CAP (mortarboard) with a golden tassel. The hero is BIG (about half of the image height), the head in the upper-middle part of the image, the whole body visible. Move the thesis book, the jar of peanut butter and the black bicycle helmet on the wooden bench slightly aside or keep them small in the lower foreground so they do not hide the hero. Golden confetti, sparkles and thrown caps around; a few red chili peppers fly among the confetti and thrown caps. Keep the TOP ~12% calm (soft sky). Mood: festive, proud, heart-warming.
+
+NO text, NO letters, NO watermark, NO UI, NO frame, NO speech bubbles, only ONE person.
+
+After image_gen returns, copy ONLY the PNG created by THIS Codex session to:
+  D:/workspace/pheno-quest/_wingen/raw/bg_oriane_win.png
+CRITICAL: do NOT select "the newest PNG" globally from ~/.codex/generated_images. Use only the generated_images subdirectory for YOUR OWN Codex session id, or otherwise verify the file was produced by your own image_gen call. If you cannot identify it unambiguously, print FAIL_UNSAFE_COPY instead.
+Do NOT run chroma-key removal, do NOT delete files. Finally print exactly:
+  RAW: D:/workspace/pheno-quest/_wingen/raw/bg_oriane_win.png (<W>x<H>)

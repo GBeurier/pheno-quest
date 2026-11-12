@@ -1028,6 +1028,8 @@ window.CONFIG = {
     win:      'SOUTENANCE REUSSIE !  Felicitations Docteure Laura !',
     lose:     'Aie... reprends des forces et recommence !',
     retry:    'ESPACE pour continuer',
+    winQuit:  '{key} : retour au titre',   // victory screen: only the quit key leaves it
+
     bossWarn: 'Bats le boss pour écrire le chapitre !',
     catEmpty: 'Plus de chat ! (ramasse des croquettes)',
     publi:    'PUBLICATION TROUVEE ! +100%',

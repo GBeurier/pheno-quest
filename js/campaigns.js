@@ -9,7 +9,7 @@ window.LQ_CAMPAIGNS = (() => {
       id: 'laura_phd', title: 'La quete du riz',
       levels: C.levels.slice(), finalLevel: 'jury',
       world: Object.assign({ background: 'bg_map' }, C.world),
-      screens: { chapter: 'bg_chapter', win: 'bg_win' },
+      screens: { chapter: 'bg_chapter', win: 'bg_win', winHero: true },
       story: Object.assign({ progressLabel: 'Manuscrit', levelLabel: 'Chapitres',
         finishLabel: 'PhD', collectibleLabel: 'Publis' }, C.story, {
         chapters: Object.fromEntries(C.levels.map((key, i) => [key, C.story.chapters[i] || ''])),
@@ -25,7 +25,7 @@ window.LQ_CAMPAIGNS = (() => {
         { key: 'marcos_village',  x: 470, y: 300, label: 'LE VILLAGE',   boss: 'PAK DURIAN' },
         { key: 'marcos_parcelle', x: 760, y: 230, label: 'LA PARCELLE',  boss: 'GARUDA' },
       ] },
-      screens: { chapter: 'bg_marcos_chapter', win: 'bg_marcos_win', popup: 'bg_marcos_chapter',
+      screens: { chapter: 'bg_marcos_chapter', win: 'bg_marcos_win', winHero: true, popup: 'bg_marcos_chapter',
                  fallback: 'bg_marcos_port' },
       startVehicle: { enabled: false },
       story: {
@@ -61,7 +61,7 @@ window.LQ_CAMPAIGNS = (() => {
         { key: 'oriane_simu',   x: 440, y: 296, label: 'LA SIMULATION',  boss: 'STICS' },
         { key: 'oriane_labo',   x: 736, y: 232, label: 'LE LABO',        boss: 'WORIANE' },
       ] },
-      screens: { chapter: 'bg_oriane_chapter', win: 'bg_oriane_win', popup: 'bg_oriane_chapter',
+      screens: { chapter: 'bg_oriane_chapter', win: 'bg_oriane_win', winHero: true, popup: 'bg_oriane_chapter',
                  fallback: 'bg_chapter' },
       startVehicle: { enabled: false },
       story: {
