@@ -501,6 +501,7 @@ window.CONFIG = {
     rlogo:        { sprite: 'enemy_rlogo',   fallback: 'enemy_imprimante', hp: 3, touchDamage: 1, move: 'shooter', shotEvery: 2.1, range: 440, shotSpeed: 250, anim: 'walk', score: 200, scale: 0.8, shot: 'shot_error', hit: { w: 0.80, h: 0.84 } },
     javacup:      { sprite: 'enemy_javacup', fallback: 'enemy_cafard',     hp: 2, touchDamage: 1, move: 'chase',   speed: 175, range: 100, aggro: 520, anim: 'walk', score: 140, scale: 0.7, hit: { w: 0.80, h: 0.80 } },
     glitch:       { sprite: 'enemy_glitch',  fallback: 'enemy_moustique',  hp: 1, touchDamage: 1, move: 'fly',     speed: 130, range: 160, amp: 40, anim: 'walk', score: 130, scale: 0.45, hit: { w: 0.86, h: 0.86 } },
+    error404:     { sprite: 'enemy_notfound', fallback: 'enemy_glitch', hp: 1, touchDamage: 1, move: 'fly',     speed: 125, range: 160, amp: 42, anim: 'walk', score: 130, scale: 0.45, noFlip: true, hit: { w: 0.64, h: 0.80 } },
     doute:        { sprite: 'shot_doubt',    fallback: 'enemy_moustique',  hp: 1, touchDamage: 1, move: 'homing',  speed: 140, life: 6, score: 20, scale: 0.9, faceRight: true, hit: { w: 0.70, h: 0.60 } },
     // PASSANT = figurant ambiant INOFFENSIF (touchDamage 0) : fait les cent
     //  pas, ne blesse JAMAIS Laura. Le TUER ne rapporte rien (score 0) et fait
@@ -580,7 +581,7 @@ window.CONFIG = {
     //  WORIANE (oriane_labo, FINAL, AI 'woriane'): Oriane's dark twin. pace ->
     //  ONE attack (chili fan / dark jar rolling on the floor / doubt clouds +
     //  lightning; P2 adds a panic dash and a chili spiral) -> COLLAPSE (curled
-    //  up crying = PUNISH, collapseTime).
+    //  grumbling under a black cloud = PUNISH, collapseTime).
     woriane:      { sprite: 'boss_woriane_move', attackSprite: 'boss_woriane_atk', fallback: 'boss_cendrine_move', fallbackAtk: 'boss_cendrine_atk', behavior: 'woriane',
                     //  FINAL boss, the hardest of Oriane's: 15% bigger, aimed potshots while
                     //  pacing, comboN attacks chained before each (short) collapse window.
@@ -793,6 +794,7 @@ window.CONFIG = {
     ammo_chili_fire: { sliceX: 6, anims: { spin: { from: 0, to: 5, loop: true, speed: 16 } } },
     enemy_rlogo:     { sliceX: 6, sliceY: 1, anims: { walk: { from: 0, to: 2, loop: true, speed: 8  }, hurt: { from: 3, to: 3 }, attack: { from: 4, to: 5, loop: true, speed: 10 } } },
     enemy_javacup:   { sliceX: 6, sliceY: 1, anims: { walk: { from: 0, to: 2, loop: true, speed: 12 }, hurt: { from: 3, to: 3 }, attack: { from: 4, to: 5, loop: true, speed: 12 } } },
+    enemy_notfound:  { sliceX: 6, sliceY: 1, anims: { walk: { from: 0, to: 2, loop: true, speed: 10 }, hurt: { from: 3, to: 3 }, attack: { from: 4, to: 5, loop: true, speed: 12 } } },
     enemy_glitch:    { sliceX: 6, sliceY: 1, anims: { walk: { from: 0, to: 2, loop: true, speed: 14 }, hurt: { from: 3, to: 3 }, attack: { from: 4, to: 5, loop: true, speed: 14 } } },
     boss_stics_move: { sliceX: 6, sliceY: 1, anims: { idle: { from: 0, to: 4, loop: true, speed: 8 }, hurt: { from: 5, to: 5 } } },
     //  stics: 0 charge, 1 fires packets, 2 sprays nitrogen, 3 overheats, 4 crashed (blue screen), 5 reboot.
@@ -800,7 +802,7 @@ window.CONFIG = {
                        charge: { from: 0, to: 0 }, fire: { from: 0, to: 1, loop: true, speed: 8 }, spray: { from: 2, to: 2 },
                        overheat: { from: 3, to: 3 }, crash: { from: 4, to: 4 }, reboot: { from: 5, to: 5 } } },
     boss_woriane_move: { sliceX: 6, sliceY: 1, anims: { idle: { from: 0, to: 4, loop: true, speed: 8 }, hurt: { from: 5, to: 5 } } },
-    //  woriane: 0 wind-up, 1 throws, 2 bowls a jar, 3 doubt cloud, 4 dash, 5 collapsed crying.
+    //  woriane: 0 wind-up, 1 throws, 2 bowls a jar, 3 doubt cloud, 4 dash, 5 collapsed, grumbling under a black cloud.
     boss_woriane_atk:  { sliceX: 6, sliceY: 1, anims: { attack: { from: 0, to: 5, loop: true, speed: 10 },
                          windup: { from: 0, to: 0 }, throw: { from: 0, to: 1, loop: false, speed: 6 }, bowl: { from: 2, to: 2 },
                          doubt: { from: 3, to: 3 }, dash: { from: 4, to: 4 }, collapse: { from: 5, to: 5 } } },

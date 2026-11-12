@@ -27,7 +27,8 @@ Non-goals: changing Laura's or Marcos's gameplay (every engine change is gated b
 2. **`oriane_simu` — "La simulation"**: inside the crop model. Pixel world: giant screens, code, voxel
    crops, wireframe intercrop plots, glowing code-window platforms. Enemies: R-logo shooters
    (SticsRPacks — she never wanted to touch R), Java coffee-cup chargers (JavaStics), flying pixel
-   bugs (`glitch`), printers and mosquitoes reused. Boss **STICS, le modèle qui plante** (the crop model she keeps running and that keeps crashing) (IA `stics`):
+   bugs (`glitch`), flying "error 404" windows (`error404`, map char `4`, in place of the
+   mosquitoes; R-logo shooters `v` replace the photocopiers). Boss **STICS, le modèle qui plante** (the crop model she keeps running and that keeps crashing) (IA `stics`):
    - *calcul*: fans roar, LEDs flash (telegraph) -> bursts of data packets;
    - *azote*: sprays nitrogen droplets that rain down on marked spots ("T'as dilue l'azote dans la
      courbe de STICS ?");
@@ -41,7 +42,7 @@ Non-goals: changing Laura's or Marcos's gameplay (every engine change is gated b
    - mirrors Oriane: throws dark chilis, bowls dark peanut-butter jars, dashes;
    - *doute*: summons storm clouds of doubt that follow Oriane and drop lightning;
    - *panique* (P2): a panic dash across the arena and a spiral of dark chilis in every direction;
-   - *effondrement*: collapses, curled up crying = punish window.
+   - *effondrement*: collapses, sits grumbling under a black comic-book cloud (no tears) = punish window.
    - Tuning after playtest (2026-11-11): she was too passive -> 160 HP, 15% bigger, aimed potshots while
      pacing, 2 chained attacks per cycle (3 in P2), shorter collapse (1.4 s / 1.0 s). Sprite redone from
      Oriane's photos so she reads as Oriane's Wario-style twin (same face and hair, purple W hoodie, evil grin).

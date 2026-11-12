@@ -1,0 +1,16 @@
+Use your built-in image_gen tool (the "imagegen" skill) to GENERATE raster pixel art. Do NOT use the CLI fallback (no OPENAI_API_KEY). Do NOT draw procedurally (no PIL/canvas/SVG). The artwork MUST come from your AI image generator. You will generate ONE sprite sheet (6 frames) for one small ENEMY character of a lighthearted cartoon platformer.
+
+PIXEL-ART STYLE: retro 16-bit SNES / arcade run-and-gun look. Crisp visible square pixels, bold dark outline, limited vibrant palette, flat cel shading, chunky READABLE shapes. NO smooth gradients, NO anti-aliasing, NO airbrushed/painterly look, NO 3D. Caricatured, expressive, a bit comedic (this is a birthday-gift game).
+
+LAYOUT (critical): EXACTLY 6 frames in a SINGLE horizontal row, on a uniform grid of 6 equal cells. Same cell size for all; the character at the SAME scale, standing on the SAME ground baseline near the bottom of each cell, centered in its cell. Leave a WIDE empty magenta gap between consecutive frames (each frame a clearly separated island; frames MUST NOT touch or overlap; nothing crosses into a neighbour). Character identity, outfit and colors IDENTICAL across all 6 frames; only the POSE changes. The character faces the viewer.
+
+BACKGROUND: fill the ENTIRE image (including the gaps) with ONE perfectly FLAT solid #ff00ff magenta. NO shadow, NO contact shadow, NO floor line, NO gradient, NO grid lines, NO frame numbers, NO text other than the "404" on the window, NO watermark. NEVER use magenta or pink anywhere on the character.
+
+CHARACTER (identical in every frame): a flying "ERROR 404" pest: a small retro BROWSER / software WINDOW (pale grey-white panel, blue title bar with three tiny round buttons and a little close box) displaying the big chunky dark digits "404" in the middle (the ONLY text allowed, it MUST read exactly "404", never mirrored), with a grumpy little face (two angry eyes above the digits), two tiny cyan insect wings on its sides and a few corrupted glitch pixels flickering on its edges. Seen FROM THE FRONT (the window faces the viewer so "404" is always readable). Comedic broken-link pest, shown FLYING (no ground under it).
+
+THE 6 FRAMES (all facing the viewer): frames 1-3 = a subtle looping MOVE/IDLE cycle (flying in place, wings buzzing, window bobbing slightly, a few glitch pixels flickering); frame 4 = a HURT pose (window cracked and tilted, "404" scrambled by glitch stripes, dizzy eyes, pixels breaking off); frames 5-6 = an ATTACK (window turns angry RED with yellow "404", lunging forward, glitch pixels streaking behind). Keep the silhouette readable at small size (this sprite is shown tiny in-game): bold shape, strong contrast.
+
+cp the generated PNG to D:/workspace/pheno-quest/_monstgen/raw/notfound_sheet.png
+
+Generate the sheet (ONE image_gen call), then cp it. Do NOT run chroma-key removal, do NOT delete any files. Finally print exactly:
+  SHEET: D:/workspace/pheno-quest/_monstgen/raw/notfound_sheet.png (<W>x<H>)

@@ -184,7 +184,7 @@ window.LEVELS = {
   // ======================= ORIANE campaign (crop modelling) =======================
   //  Cf. docs/superpowers/specs/2026-11-10-oriane-campaign-design.md.
   //  New map chars: 'v' R logo (shooter), 'j' Java coffee cup (ground charger),
-  //  'h' glitch (flying pixel bug).
+  //  'h' glitch (flying pixel bug), '4' error 404 (flying error window).
   //  1. The apartment: Laura's apartment map and the same landlord boss.
   oriane_appart: {
     boss: 'proprietaire', music: 'niveau2', npcLevel: 'oriane',

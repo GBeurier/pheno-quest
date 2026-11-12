@@ -2014,6 +2014,7 @@
       }
       default: e.flipX = e.facing < 0; break;   // static : regarde le joueur
     }
+    if (e.def.noFlip) e.flipX = false;          // sprite with readable text (e.g. "404"): never mirrored
 
     // --- ANIM (apres l'IA) : priorite hurt > attack > walk. Les monstres en
     //  contact (mêlée/immobile) jouent 'attack' quand le joueur est colle ; les
@@ -3337,6 +3338,7 @@
           case 'v': spawnEnemy('rlogo', cx, groundY); break;                  // SHOOTER: R logo (SticsRPacks)
           case 'j': spawnEnemy('javacup', cx, groundY); break;                // GROUND: Java coffee cup charger
           case 'h': spawnEnemy('glitch', cx, groundY - TS * 1.6); break;      // FLYER: pixel bug
+          case '4': spawnEnemy('error404', cx, groundY - TS * 1.6); break;    // FLYER: "404" error window
           case 'u': {                                                          // DURIAN : au sol, ou SUSPENDU si la case du dessous est vide
             const below = (rows[r + 1] || '')[c] || ' ';
             spawnEnemy('durian', cx, groundY, { hanging: '=-x^%~'.indexOf(below) === -1 });

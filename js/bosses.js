@@ -1355,7 +1355,7 @@ window.BOSS_AI = (() => {
   /* ---------------------------------------------------------------------
    *  WORIANE, Oriane's dark twin (oriane_labo, FINAL boss) — AI 'woriane'.
    *  She embodies Oriane's doubts. She paces nervously, then performs ONE
-   *  attack from a rotation and COLLAPSES (curled up, crying = PUNISH):
+   *  attack from a rotation and COLLAPSES (sitting, grumbling under a black cloud = PUNISH):
    *   chili : throws a fan of cursed dark chilis (mirror of Oriane's SPACE);
    *   jar   : bowls a dark peanut-butter jar along the floor (jump over it);
    *   doubt : summons storm clouds of doubt that chase Oriane, lightning
@@ -1465,7 +1465,7 @@ window.BOSS_AI = (() => {
       }
       if (b.st > 0.35 + waves * 0.35 + 0.2) finish();
     } else {
-      // COLLAPSE: overwhelmed by doubt, curled up crying -> PUNISH WINDOW
+      // COLLAPSE: overwhelmed by doubt, sits grumbling under a black cloud -> PUNISH WINDOW
       b.animWant = 'collapse';
       b.guard = 1;
       b.fx += dt();
