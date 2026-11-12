@@ -187,7 +187,7 @@ window.LEVELS = {
   //  'h' glitch (flying pixel bug), '4' error 404 (flying error window).
   //  1. The apartment: Laura's apartment map and the same landlord boss.
   oriane_appart: {
-    boss: 'proprietaire', music: 'niveau2', npcLevel: 'oriane',
+    boss: 'proprietaire', music: 'oriane_niveau1', npcLevel: 'oriane',
     par: { or: 180, argent: 270, bronze: 395 },
     theme: {
       sky: [196, 188, 206],
@@ -206,7 +206,7 @@ window.LEVELS = {
   },
   //  2. Inside the crop model: pixel world, code, voxel crops -> STICS, the crop model that keeps crashing.
   oriane_simu: {
-    boss: 'stics', music: 'niveau3', npcLevel: 'oriane',
+    boss: 'stics', music: 'oriane_niveau2', npcLevel: 'oriane',
     par: { or: 115, argent: 170, bronze: 250 },
     theme: {
       sky: [18, 24, 54], tint: [226, 236, 255],
@@ -224,7 +224,7 @@ window.LEVELS = {
   },
   //  3. The lab: the real CIRAD corridor (photos) -> WORIANE, her dark twin (final).
   oriane_labo: {
-    boss: 'woriane', music: 'niveau4', npcLevel: 'oriane',
+    boss: 'woriane', music: 'oriane_niveau3', npcLevel: 'oriane',
     par: { or: 130, argent: 190, bronze: 270 },
     theme: {
       sky: [214, 210, 196],
